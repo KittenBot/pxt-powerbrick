@@ -45,7 +45,7 @@ namespace backpack {
     }
 
     //% blockId=backpack_ultrasonic block="Ultrasonic|port %port"
-    //% weight=90
+    //% weight=91
     export function Ultrasonic(port: Ports): number {
 
         // send pulse
@@ -76,10 +76,19 @@ namespace backpack {
         return pins.analogReadPin(pin)
     }
 
+    //% blockId=backpack_tracer block="Tracer|port %port|slot %slot"
+    //% weight=80
+    export function Tracer(port: Ports, slot: Slots): number {
+        let pin = PortDigi[port][slot]
+        pins.setPull(pin, PinPullMode.PullUp)
+        return pins.digitalReadPin(pin)
+    }
+
     //% blockId=backpack_bumper block="Bumper|port %port|slot %slot"
     //% weight=70
     export function Bumper(port: Ports, slot: Slots): number {
         let pin = PortDigi[port][slot]
+        pins.setPull(pin, PinPullMode.PullUp)
         return pins.digitalReadPin(pin)
     }
 
