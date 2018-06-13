@@ -1,0 +1,17 @@
+{
+    "name": "pxt-backpack",
+    "version": "0.1.0",
+    "description": "Backpack module for microbit",
+    "license": "MIT",
+    "dependencies": {
+        "core": "*"
+    },
+    "files": [
+        "README.md",
+        "main.ts"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "public": true
+}
