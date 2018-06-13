@@ -1,11 +1,13 @@
 /*
 Riven
+Microbit backpack extension board
 load dependency
 "backpack": "file:../pxt-backpack"
+dht11 port from MonadnockSystems/pxt-dht11
 */
 
 
-//% color="#13c2c2" weight=10 icon="\uf1d0"
+//% color="#13c2c2" weight=10 icon="\uf17b"
 namespace backpack {
 
     const PortDigi = [
@@ -35,7 +37,51 @@ namespace backpack {
         B = 1
     }
 
+    export enum DHT11Type {
+        Temperature = 0,
+        Humidity = 1
+    }
+
+    function dht11Update(pin: DigitalPin): number {
+        let loopCnt = 50;
+        pins.digitalWritePin(pin, 0)
+        basic.pause(20)
+        control.waitMicros(40)
+        let t = pins.digitalReadPin(pin)
+        pins.setPull(pin, PinPullMode.PullUp);
+
+        // Wait for response header to finish
+        // dht11 only response every 2s
+        while (pins.digitalReadPin(pin) == 1) {
+            loopCnt--;
+            if (loopCnt == 0) {
+                return -1
+            }
+        };
+        while (pins.digitalReadPin(pin) == 0);
+        while (pins.digitalReadPin(pin) == 1);
+        let value = 0;
+        let counter = 0;
+        for (let i = 0; i <= 32 - 1; i++) {
+            loopCnt = 50;
+            while (pins.digitalReadPin(pin) == 0);
+            counter = 0
+            while (pins.digitalReadPin(pin) == 1) {
+                counter += 1;
+            }
+            if (counter > 4) {
+                value = value + (1 << (31 - i));
+            }
+        }
+        // todo: add bit check
+        dht11Temp = (value & 0x0000ff00) >> 8;
+        dht11Humi = value >> 24;
+        return 0;
+    }
+
     let distanceBuf = 0;
+    let dht11Temp = -1;
+    let dht11Humi = -1;
 
     //% blockId=backpack_init block="Backpack Init"
     //% weight=100
@@ -47,7 +93,6 @@ namespace backpack {
     //% blockId=backpack_ultrasonic block="Ultrasonic|port %port"
     //% weight=91
     export function Ultrasonic(port: Ports): number {
-
         // send pulse
         let pin = PortDigi[port][0]
         pins.setPull(pin, PinPullMode.PullNone);
@@ -86,10 +131,23 @@ namespace backpack {
 
     //% blockId=backpack_bumper block="Bumper|port %port|slot %slot"
     //% weight=70
+    //% blockGap=50
     export function Bumper(port: Ports, slot: Slots): number {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
         return pins.digitalReadPin(pin)
+    }
+
+    //% blockId=backpack_dht11 block="DHT11|port %port|type %readtype"
+    //% weight=60
+    export function DHT11(port: Ports, readtype: DHT11Type): number {
+        let pin = PortDigi[port][0]
+        dht11Update(pin)
+        if (readtype == DHT11Type.Temperature) {
+            return dht11Temp;
+        } else {
+            return dht11Humi;
+        }
     }
 
 }
