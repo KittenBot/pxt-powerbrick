@@ -9,6 +9,21 @@ dht11 port from MonadnockSystems/pxt-dht11
 
 //% color="#13c2c2" weight=10 icon="\uf17b"
 namespace backpack {
+    const PCA9685_ADDRESS = 0x40
+    const MODE1 = 0x00
+    const MODE2 = 0x01
+    const SUBADR1 = 0x02
+    const SUBADR2 = 0x03
+    const SUBADR3 = 0x04
+    const PRESCALE = 0xFE
+    const LED0_ON_L = 0x06
+    const LED0_ON_H = 0x07
+    const LED0_OFF_L = 0x08
+    const LED0_OFF_H = 0x09
+    const ALL_LED_ON_L = 0xFA
+    const ALL_LED_ON_H = 0xFB
+    const ALL_LED_OFF_L = 0xFC
+    const ALL_LED_OFF_H = 0xFD
 
     const PortDigi = [
         [DigitalPin.P8, DigitalPin.P0],
@@ -40,6 +55,26 @@ namespace backpack {
     export enum DHT11Type {
         Temperature = 0,
         Humidity = 1
+    }
+
+    export enum Servos {
+        S1 = 8,
+        S2 = 9,
+        S3 = 10,
+        S4 = 11,
+        S5 = 12,
+        S6 = 13,
+        S7 = 14,
+        S8 = 15,
+        S9 = 7,
+        S10 = 6,
+        S11 = 5,
+        S12 = 4
+    }
+
+    export enum Motors {
+        M1 = 0x1,
+        M2 = 0x2
     }
 
     function dht11Update(pin: DigitalPin): number {
@@ -79,9 +114,68 @@ namespace backpack {
         return 0;
     }
 
+    let initialized = false
     let distanceBuf = 0;
     let dht11Temp = -1;
     let dht11Humi = -1;
+
+    function i2cwrite(addr: number, reg: number, value: number) {
+        let buf = pins.createBuffer(2)
+        buf[0] = reg
+        buf[1] = value
+        pins.i2cWriteBuffer(addr, buf)
+    }
+
+    function i2ccmd(addr: number, value: number) {
+        let buf = pins.createBuffer(1)
+        buf[0] = value
+        pins.i2cWriteBuffer(addr, buf)
+    }
+
+    function i2cread(addr: number, reg: number) {
+        pins.i2cWriteNumber(addr, reg, NumberFormat.UInt8BE);
+        let val = pins.i2cReadNumber(addr, NumberFormat.UInt8BE);
+        return val;
+    }
+
+    function initPCA9685(): void {
+        i2cwrite(PCA9685_ADDRESS, MODE1, 0x00)
+        setFreq(50);
+        for (let idx = 0; idx < 16; idx++) {
+            setPwm(idx, 0, 0);
+        }
+        initialized = true
+    }
+
+    function setFreq(freq: number): void {
+        // Constrain the frequency
+        let prescaleval = 25000000;
+        prescaleval /= 4096;
+        prescaleval /= freq;
+        prescaleval -= 1;
+        let prescale = prescaleval; //Math.Floor(prescaleval + 0.5);
+        let oldmode = i2cread(PCA9685_ADDRESS, MODE1);
+        let newmode = (oldmode & 0x7F) | 0x10; // sleep
+        i2cwrite(PCA9685_ADDRESS, MODE1, newmode); // go to sleep
+        i2cwrite(PCA9685_ADDRESS, PRESCALE, prescale); // set the prescaler
+        i2cwrite(PCA9685_ADDRESS, MODE1, oldmode);
+        control.waitMicros(5000);
+        i2cwrite(PCA9685_ADDRESS, MODE1, oldmode | 0xa1);
+    }
+
+    function setPwm(channel: number, on: number, off: number): void {
+        if (channel < 0 || channel > 15)
+            return;
+
+        let buf = pins.createBuffer(5);
+        buf[0] = LED0_ON_L + 4 * channel;
+        buf[1] = on & 0xff;
+        buf[2] = (on >> 8) & 0xff;
+        buf[3] = off & 0xff;
+        buf[4] = (off >> 8) & 0xff;
+        pins.i2cWriteBuffer(PCA9685_ADDRESS, buf);
+    }
+
 
     //% blockId=backpack_init block="Backpack Init"
     //% weight=100
@@ -140,6 +234,7 @@ namespace backpack {
 
     //% blockId=backpack_dht11 block="DHT11|port %port|type %readtype"
     //% weight=60
+    //% blockGap=50
     export function DHT11(port: Ports, readtype: DHT11Type): number {
         let pin = PortDigi[port][0]
         dht11Update(pin)
@@ -150,4 +245,82 @@ namespace backpack {
         }
     }
 
+    //% blockId=backpack_servo block="Servo|%index|degree %degree"
+    //% weight=50
+    //% blockGap=50
+    //% degree.min=-45 degree.max=225
+    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    export function Servo(index: Servos, degree: number): void {
+        if (!initialized) {
+            initPCA9685()
+        }
+        // 50hz: 20,000 us
+        let v_us = ((degree -90) * 20 / 3 + 1500) // 0.6 ~ 2.4
+        let value = v_us * 4096 / 20000
+        serial.writeValue("" + index, v_us)
+        setPwm(index, 0, value)
+    }
+
+    //% blockId=backpack_motor_run block="Motor|%index|speed %speed"
+    //% weight=44
+    //% speed.min=-255 speed.max=255
+    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    export function MotorRun(index: Motors, speed: number): void {
+        if (!initialized) {
+            initPCA9685()
+        }
+        speed = speed * 16; // map 255 to 4096
+        if (speed >= 4096) {
+            speed = 4095
+        }
+        if (speed <= -4096) {
+            speed = -4095
+        }
+        if (index > 2 || index <= 0)
+            return
+        let pp = (index - 1) * 2
+        let pn = (index - 1) * 2 + 1
+        if (speed >= 0) {
+            setPwm(pp, 0, speed)
+            setPwm(pn, 0, 0)
+        } else {
+            setPwm(pp, 0, 0)
+            setPwm(pn, 0, -speed)
+        }
+    }
+
+    
+    //% blockId=backpack_motor_dual block="Motor|speed %speed1|speed %speed2"
+    //% weight=43
+    //% speed1.min=-255 speed1.max=255
+    //% speed2.min=-255 speed2.max=255
+    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    export function MotorRunDual(speed1: number, speed2: number): void {
+        MotorRun(0, speed1);
+        MotorRun(1, speed2);
+    }
+
+    //% blockId=backpack_motor_rundelay block="Motor|%index|speed %speed|delay %delay|s"
+    //% weight=42
+    //% speed.min=-255 speed.max=255
+    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    export function MotorRunDelay(index: Motors, speed: number, delay: number): void {
+        MotorRun(index, speed);
+        basic.pause(delay * 1000);
+        MotorRun(index, 0);
+    }
+
+    //% blockId=backpack_stop block="Motor Stop|%index|"
+    //% weight=41
+    export function MotorStop(index: Motors): void {
+        MotorRun(index, 0);
+    }
+
+    //% blockId=backpack_stop_all block="Motor Stop All"
+    //% weight=40
+    //% blockGap=50
+    export function MotorStopAll(): void {
+        MotorRun(0, 0);
+        MotorRun(1, 0);
+    }
 }
