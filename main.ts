@@ -1,14 +1,14 @@
 /*
 Riven
-Microbit backpack extension board
+Microbit powerbrick extension board
 load dependency
-"backpack": "file:../pxt-backpack"
+"powerbrick": "file:../pxt-powerbrick"
 dht11 port from MonadnockSystems/pxt-dht11
 */
 
 
 //% color="#13c2c2" weight=10 icon="\uf17b"
-namespace backpack {
+namespace powerbrick {
     const PCA9685_ADDRESS = 0x40
     const MODE1 = 0x00
     const MODE2 = 0x01
@@ -196,14 +196,14 @@ namespace backpack {
     }
 
 
-    //% blockId=backpack_init block="Backpack Init"
+    //% blockId=powerbrick_init block="powerbrick Init"
     //% weight=100
     //% blockGap=50
     export function Init(): void {
 
     }
 
-    //% blockId=backpack_ultrasonic block="Ultrasonic|port %port"
+    //% blockId=powerbrick_ultrasonic block="Ultrasonic|port %port"
     //% weight=91
     export function Ultrasonic(port: Ports): number {
         // send pulse
@@ -226,7 +226,7 @@ namespace backpack {
         return ret * 10 / 6 / 58;
     }
 
-    //% blockId=backpack_sound block="Sound|port %port"
+    //% blockId=powerbrick_sound block="Sound|port %port"
     //% weight=90
     //% blockGap=50
     export function SoundSensor(port: Ports): number {
@@ -234,7 +234,7 @@ namespace backpack {
         return pins.analogReadPin(pin)
     }
 
-    //% blockId=backpack_tracer block="Tracer|port %port|slot %slot"
+    //% blockId=powerbrick_tracer block="Tracer|port %port|slot %slot"
     //% weight=80
     export function Tracer(port: Ports, slot: Slots): number {
         let pin = PortDigi[port][slot]
@@ -242,7 +242,7 @@ namespace backpack {
         return pins.digitalReadPin(pin)
     }
 
-    //% blockId=backpack_bumper block="Bumper|port %port|slot %slot"
+    //% blockId=powerbrick_bumper block="Bumper|port %port|slot %slot"
     //% weight=70
     //% blockGap=50
     export function Bumper(port: Ports, slot: Slots): number {
@@ -251,7 +251,7 @@ namespace backpack {
         return pins.digitalReadPin(pin)
     }
 
-    //% blockId=backpack_dht11 block="DHT11|port %port|type %readtype"
+    //% blockId=powerbrick_dht11 block="DHT11|port %port|type %readtype"
     //% weight=60
     //% blockGap=50
     export function DHT11(port: Ports, readtype: DHT11Type): number {
@@ -264,7 +264,7 @@ namespace backpack {
         }
     }
 
-    //% blockId=backpack_servo block="Servo|%index|degree %degree"
+    //% blockId=powerbrick_servo block="Servo|%index|degree %degree"
     //% weight=50
     //% blockGap=50
     //% degree.min=-45 degree.max=225
@@ -280,7 +280,7 @@ namespace backpack {
         setPwm(index, 0, value)
     }
 
-    //% blockId=backpack_motor_run block="Motor|%index|speed %speed"
+    //% blockId=powerbrick_motor_run block="Motor|%index|speed %speed"
     //% weight=44
     //% speed.min=-255 speed.max=255
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
@@ -309,7 +309,7 @@ namespace backpack {
     }
 
 
-    //% blockId=backpack_motor_dual block="Motor|speed %speed1|speed %speed2"
+    //% blockId=powerbrick_motor_dual block="Motor|speed %speed1|speed %speed2"
     //% weight=43
     //% speed1.min=-255 speed1.max=255
     //% speed2.min=-255 speed2.max=255
@@ -319,7 +319,7 @@ namespace backpack {
         MotorRun(1, speed2);
     }
 
-    //% blockId=backpack_motor_rundelay block="Motor|%index|speed %speed|delay %delay|s"
+    //% blockId=powerbrick_motor_rundelay block="Motor|%index|speed %speed|delay %delay|s"
     //% weight=42
     //% speed.min=-255 speed.max=255
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
@@ -329,13 +329,13 @@ namespace backpack {
         MotorRun(index, 0);
     }
 
-    //% blockId=backpack_stop block="Motor Stop|%index|"
+    //% blockId=powerbrick_stop block="Motor Stop|%index|"
     //% weight=41
     export function MotorStop(index: Motors): void {
         MotorRun(index, 0);
     }
 
-    //% blockId=backpack_stop_all block="Motor Stop All"
+    //% blockId=powerbrick_stop_all block="Motor Stop All"
     //% weight=40
     //% blockGap=50
     export function MotorStopAll(): void {
@@ -351,7 +351,7 @@ namespace backpack {
         return sum;
     }
 
-    //% blockId=backpack_mp3_connect block="MP3 Connect|port %port"
+    //% blockId=powerbrick_mp3_connect block="MP3 Connect|port %port"
     //% weight=39
     export function MP3Connect(port: SerialPorts): void {
         let pin0 = PortSerial[port][0]
@@ -360,7 +360,7 @@ namespace backpack {
         serial.redirect(pin1, SerialPin.P16, BaudRate.BaudRate9600)
     }
 
-    //% blockId=backpack_mp3_play block="MP3 Play|%PrevNext"
+    //% blockId=powerbrick_mp3_play block="MP3 Play|%PrevNext"
     //% weight=38
     export function MP3Play(pn: PrevNext): void {
         let buf = pins.createBuffer(5);
@@ -372,7 +372,7 @@ namespace backpack {
         serial.writeBuffer(buf)
     }
 
-    //% blockId=backpack_mp3_volumn block="MP3 Volumn|%volumn"
+    //% blockId=powerbrick_mp3_volumn block="MP3 Volumn|%volumn"
     //% volumn.min=0 volumn.max=31
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     //% weight=37
@@ -387,7 +387,7 @@ namespace backpack {
         serial.writeBuffer(buf)
     }
 
-    //% blockId=backpack_mp3_playindex block="MP3 Play Index|%index"
+    //% blockId=powerbrick_mp3_playindex block="MP3 Play Index|%index"
     //% weight=37
     export function MP3PlayIndex(index: number): void {
         let buf = pins.createBuffer(7);
@@ -401,7 +401,7 @@ namespace backpack {
         serial.writeBuffer(buf)
     }
 
-    //% blockId=backpack_mp3_playname block="MP3 Play Name|%name"
+    //% blockId=powerbrick_mp3_playname block="MP3 Play Name|%name"
     //% weight=36
     export function MP3PlayName(str: string): void {
         let len = str.length;

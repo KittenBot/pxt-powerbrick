@@ -1,7 +1,7 @@
 {
-    "name": "pxt-backpack",
+    "name": "pxt-powerbrick",
     "version": "0.1.0",
-    "description": "Backpack module for microbit",
+    "description": "Powerbrick series module for microbit",
     "license": "MIT",
     "dependencies": {
         "core": "*"
