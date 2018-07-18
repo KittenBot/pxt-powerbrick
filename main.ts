@@ -356,7 +356,8 @@ namespace backpack {
     export function MP3Connect(port: SerialPorts): void {
         let pin0 = PortSerial[port][0]
         let pin1 = PortSerial[port][1]
-        serial.redirect(pin1, pin0, BaudRate.BaudRate9600)
+        // todo: fiber may freeze on steam reading
+        serial.redirect(pin1, SerialPin.P16, BaudRate.BaudRate9600)
     }
 
     //% blockId=backpack_mp3_play block="MP3 Play|%PrevNext"
@@ -368,9 +369,7 @@ namespace backpack {
         buf[2] = pn;
         buf[3] = buf[1] + buf[2];
         buf[4] = 0xef;
-        basic.showString("#1")
         serial.writeBuffer(buf)
-        basic.showString("#2")
     }
 
     //% blockId=backpack_mp3_volumn block="MP3 Volumn|%volumn"
