@@ -35,6 +35,13 @@ namespace backpack {
         [DigitalPin.P9, DigitalPin.P10]
     ]
 
+    const PortSerial = [
+        [SerialPin.P8, SerialPin.P0],
+        [SerialPin.P12, SerialPin.P1],
+        [SerialPin.P13, SerialPin.P2],
+        [SerialPin.P15, SerialPin.P14]
+    ]
+
     const PortAnalog = [AnalogPin.P0, AnalogPin.P1, AnalogPin.P2, null, AnalogPin.P3, AnalogPin.P4, AnalogPin.P10]
 
     export enum Ports {
@@ -45,6 +52,18 @@ namespace backpack {
         PORT5 = 4,
         PORT6 = 5,
         PORT7 = 6
+    }
+
+    export enum SerialPorts {
+        PORT1 = 0,
+        PORT2 = 1,
+        PORT3 = 2,
+        PORT4 = 3
+    }
+
+    export enum PrevNext {
+        Prev = 0xac,
+        Next = 0xad
     }
 
     export enum Slots {
@@ -255,7 +274,7 @@ namespace backpack {
             initPCA9685()
         }
         // 50hz: 20,000 us
-        let v_us = ((degree -90) * 20 / 3 + 1500) // 0.6 ~ 2.4
+        let v_us = ((degree - 90) * 20 / 3 + 1500) // 0.6 ~ 2.4
         let value = v_us * 4096 / 20000
         serial.writeValue("" + index, v_us)
         setPwm(index, 0, value)
@@ -289,7 +308,7 @@ namespace backpack {
         }
     }
 
-    
+
     //% blockId=backpack_motor_dual block="Motor|speed %speed1|speed %speed2"
     //% weight=43
     //% speed1.min=-255 speed1.max=255
@@ -323,4 +342,81 @@ namespace backpack {
         MotorRun(0, 0);
         MotorRun(1, 0);
     }
+
+    function calcSum(buf: Buffer, start: number, end: number): number {
+        let sum = 0;
+        for (let i = start; i <= end; i++) {
+            sum += buf[i];
+        }
+        return sum;
+    }
+
+    //% blockId=backpack_mp3_connect block="MP3 Connect|port %port"
+    //% weight=39
+    export function MP3Connect(port: SerialPorts): void {
+        let pin0 = PortSerial[port][0]
+        let pin1 = PortSerial[port][1]
+        serial.redirect(pin1, pin0, BaudRate.BaudRate9600)
+    }
+
+    //% blockId=backpack_mp3_play block="MP3 Play|%PrevNext"
+    //% weight=38
+    export function MP3Play(pn: PrevNext): void {
+        let buf = pins.createBuffer(5);
+        buf[0] = 0x7e;
+        buf[1] = 0x03;
+        buf[2] = pn;
+        buf[3] = buf[1] + buf[2];
+        buf[4] = 0xef;
+        basic.showString("#1")
+        serial.writeBuffer(buf)
+        basic.showString("#2")
+    }
+
+    //% blockId=backpack_mp3_volumn block="MP3 Volumn|%volumn"
+    //% volumn.min=0 volumn.max=31
+    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    //% weight=37
+    export function MP3Volumn(volumn: number): void {
+        let buf = pins.createBuffer(6);
+        buf[0] = 0x7e;
+        buf[1] = 0x04;
+        buf[2] = 0xae;
+        buf[3] = volumn;
+        buf[4] = calcSum(buf, 1, 3);
+        buf[5] = 0xef;
+        serial.writeBuffer(buf)
+    }
+
+    //% blockId=backpack_mp3_playindex block="MP3 Play Index|%index"
+    //% weight=37
+    export function MP3PlayIndex(index: number): void {
+        let buf = pins.createBuffer(7);
+        buf[0] = 0x7e;
+        buf[1] = 0x05;
+        buf[2] = 0xa2;
+        buf[3] = 0;
+        buf[4] = index;
+        buf[5] = calcSum(buf, 1, 4);
+        buf[6] = 0xef;
+        serial.writeBuffer(buf)
+    }
+
+    //% blockId=backpack_mp3_playname block="MP3 Play Name|%name"
+    //% weight=36
+    export function MP3PlayName(str: string): void {
+        let len = str.length;
+        if (len > 8) len = 8;
+        let buf = pins.createBuffer(len + 5);
+        buf[0] = 0x7e;
+        buf[1] = len + 3;
+        buf[2] = 0xa3;
+        for (let i = 0; i < len; i++) {
+            buf[3 + i] = str.charCodeAt(i);
+        }
+        buf[len + 3] = calcSum(buf, 1, len + 2);
+        buf[len + 4] = 0xef;
+        serial.writeBuffer(buf)
+    }
+
 }
