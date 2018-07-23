@@ -25,7 +25,7 @@ namespace powerbrick {
     const ALL_LED_OFF_L = 0xFC
     const ALL_LED_OFF_H = 0xFD
 
-    const KITTEN_COLOR = 0x6D
+    const KC_ADDR = 0x6D
     const KC_VERSION = 0x00
     const KC_MODE = 1
     const KC_READCOLOR = 21
@@ -465,43 +465,51 @@ namespace powerbrick {
     //% blockId=powerbrick_gc_mode block="Gesture/Color mode|%mode"
     //% weight=29
     export function GC_MODE(mode: GCMode): void {
-
+        i2cwrite(KC_ADDR, KC_MODE, mode);
     }
 
     //% blockId=powerbrick_gc_color block="Gesture/Color Color"
     //% weight=28
     export function GC_Color(): number {
-        return 0;
+        pins.i2cWriteNumber(KC_ADDR, KC_READCOLOR, NumberFormat.UInt8BE);
+        let buff = pins.i2cReadBuffer(KC_ADDR, 2);
+        return buff[0]*2;
     }
 
     //% blockId=powerbrick_gc_brightness block="Gesture/Color Brightness"
     //% weight=27
     export function GC_Brightness(): number {
-        return 0;
+        pins.i2cWriteNumber(KC_ADDR, KC_READCOLOR, NumberFormat.UInt8BE);
+        let buff = pins.i2cReadBuffer(KC_ADDR, 2);
+        return buff[1];
     }
 
     //% blockId=powerbrick_gc_ledpwm block="Gesture/Color LED pwm|%pwm"
     //% weight=26
     export function GC_LEDPWM(pwm: number): void {
-        
+        i2cwrite(KC_ADDR, KC_LEDPWM, pwm);
     }
 
-    //% blockId=powerbrick_gc_ledonoff block="Gesture/Color LED index|%index onoff|%onoff"
+    //% blockId=powerbrick_gc_ledonoff block="Gesture/Color LED|index %index|onoff %onoff"
     //% weight=25
     export function GC_LEDONOFF(index: number, onoff: number): void {
-
+        let buf = pins.createBuffer(3)
+        buf[0] = KC_LEDONOFF
+        buf[1] = index
+        buf[2] = onoff
+        pins.i2cWriteBuffer(KC_ADDR, buf)
     }
 
     //% blockId=powerbrick_gc_proximity block="Gesture/Color Proximity"
     //% weight=24
     export function GC_PROXIMITY(): number {
-        return 0;
+        return i2cread(KC_ADDR, KC_PROXIMITY)
     }
 
     //% blockId=powerbrick_gc_gesture block="Gesture/Color last gesture"
     //% weight=23
     export function GC_Gesture(): number {
-        return 0;
+        return i2cread(KC_ADDR, KC_GESTURE)
     }
 
 }
