@@ -25,6 +25,16 @@ namespace powerbrick {
     const ALL_LED_OFF_L = 0xFC
     const ALL_LED_OFF_H = 0xFD
 
+    const KITTEN_COLOR = 0x6D
+    const KC_VERSION = 0x00
+    const KC_MODE = 1
+    const KC_READCOLOR = 21
+    const KC_READCOLORRAW = 23
+    const KC_LEDPWM = 24
+    const KC_LEDONOFF = 25
+    const KC_PROXIMITY = 31
+    const KC_GESTURE = 41
+
     const PortDigi = [
         [DigitalPin.P8, DigitalPin.P0],
         [DigitalPin.P12, DigitalPin.P1],
@@ -105,6 +115,12 @@ namespace powerbrick {
     export enum TracerEvent {
         InLine = DAL.MICROBIT_BUTTON_EVT_DOWN,
         OutLine = DAL.MICROBIT_BUTTON_EVT_UP
+    }
+
+    export enum GCMode {
+        ColorSensor = 0x1,
+        Proximity = 0x2,
+        Gesture = 0x3
     }
 
     function dht11Update(pin: DigitalPin): number {
@@ -430,6 +446,7 @@ namespace powerbrick {
 
     //% blockId=powerbrick_mp3_playname block="MP3 Play Name|%name"
     //% weight=36
+    //% blockGap=50
     export function MP3PlayName(str: string): void {
         let len = str.length;
         if (len > 8) len = 8;
@@ -443,6 +460,48 @@ namespace powerbrick {
         buf[len + 3] = calcSum(buf, 1, len + 2);
         buf[len + 4] = 0xef;
         serial.writeBuffer(buf)
+    }
+
+    //% blockId=powerbrick_gc_mode block="Gesture/Color mode|%mode"
+    //% weight=29
+    export function GC_MODE(mode: GCMode): void {
+
+    }
+
+    //% blockId=powerbrick_gc_color block="Gesture/Color Color"
+    //% weight=28
+    export function GC_Color(): number {
+        return 0;
+    }
+
+    //% blockId=powerbrick_gc_brightness block="Gesture/Color Brightness"
+    //% weight=27
+    export function GC_Brightness(): number {
+        return 0;
+    }
+
+    //% blockId=powerbrick_gc_ledpwm block="Gesture/Color LED pwm|%pwm"
+    //% weight=26
+    export function GC_LEDPWM(pwm: number): void {
+        
+    }
+
+    //% blockId=powerbrick_gc_ledonoff block="Gesture/Color LED index|%index onoff|%onoff"
+    //% weight=25
+    export function GC_LEDONOFF(index: number, onoff: number): void {
+
+    }
+
+    //% blockId=powerbrick_gc_proximity block="Gesture/Color Proximity"
+    //% weight=24
+    export function GC_PROXIMITY(): number {
+        return 0;
+    }
+
+    //% blockId=powerbrick_gc_gesture block="Gesture/Color last gesture"
+    //% weight=23
+    export function GC_Gesture(): number {
+        return 0;
     }
 
 }
