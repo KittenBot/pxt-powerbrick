@@ -96,6 +96,17 @@ namespace powerbrick {
         M2 = 0x2
     }
 
+    export enum BumperEvent {
+        Down = DAL.MICROBIT_BUTTON_EVT_DOWN,
+        Up = DAL.MICROBIT_BUTTON_EVT_UP,
+        Click = DAL.MICROBIT_BUTTON_EVT_CLICK,
+    }
+
+    export enum TracerEvent {
+        InLine = DAL.MICROBIT_BUTTON_EVT_DOWN,
+        OutLine = DAL.MICROBIT_BUTTON_EVT_UP
+    }
+
     function dht11Update(pin: DigitalPin): number {
         let loopCnt = 50;
         pins.digitalWritePin(pin, 0)
@@ -235,21 +246,37 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_tracer block="Tracer|port %port|slot %slot"
-    //% weight=80
+    //% weight=81
     export function Tracer(port: Ports, slot: Slots): number {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
         return pins.digitalReadPin(pin)
     }
 
-    //% blockId=powerbrick_bumper block="Bumper|port %port|slot %slot"
-    //% weight=70
+    //% blockId=powerbrick_onTracerEvent block="on Tracer|%port|slot %slot|%event"
+    //% weight=80
     //% blockGap=50
+    export function onTracerEvent(port: Ports, slot: Slots, event: TracerEvent, handler: Action): void {
+        let pin = PortDigi[port][slot]
+        control.onEvent(<number>pin, <number>event, handler);
+    }
+
+    //% blockId=powerbrick_bumper block="Bumper|port %port|slot %slot"
+    //% weight=71
     export function Bumper(port: Ports, slot: Slots): number {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
         return pins.digitalReadPin(pin)
     }
+
+    //% blockId=powerbrick_onBumperEvent block="on Bumper|%port|slot %slot|%event"
+    //% weight=70
+    export function onBumperEvent(port: Ports, slot: Slots, event: BumperEvent, handler: Action): void {
+        let pin = PortDigi[port][slot]
+        control.onEvent(<number>pin, <number>event, handler);
+    }
+
+
 
     //% blockId=powerbrick_dht11 block="DHT11|port %port|type %readtype"
     //% weight=60
