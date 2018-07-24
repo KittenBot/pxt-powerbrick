@@ -123,6 +123,13 @@ namespace powerbrick {
         Gesture = 0x3
     }
 
+    export enum GCRgb {
+        Brightness = 0,
+        Red = 1,
+        Green = 2,
+        Blue = 3
+    }
+
     function dht11Update(pin: DigitalPin): number {
         let loopCnt = 50;
         pins.digitalWritePin(pin, 0)
@@ -473,7 +480,7 @@ namespace powerbrick {
     export function GC_Color(): number {
         pins.i2cWriteNumber(KC_ADDR, KC_READCOLOR, NumberFormat.UInt8BE);
         let buff = pins.i2cReadBuffer(KC_ADDR, 2);
-        return buff[0]*2;
+        return buff[0] * 2;
     }
 
     //% blockId=powerbrick_gc_brightness block="Gesture/Color Brightness"
@@ -510,6 +517,14 @@ namespace powerbrick {
     //% weight=23
     export function GC_Gesture(): number {
         return i2cread(KC_ADDR, KC_GESTURE)
+    }
+
+    //% blockId=powerbrick_gc_rgb block="Gesture/Color RGB|%rgb"
+    //% weight=20
+    export function GC_RGB(rgb: GCRgb): number {
+        pins.i2cWriteNumber(KC_ADDR, KC_READCOLOR, NumberFormat.UInt8BE);
+        let buff = pins.i2cReadBuffer(KC_ADDR, 4);
+        return buff[rgb];
     }
 
 }
