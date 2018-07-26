@@ -516,7 +516,7 @@ namespace powerbrick {
         i2cwrite(KC_ADDR, KC_LEDPWM, pwm);
     }
 
-    //% blockId=powerbrick_gc_ledonoff block="Gesture/Color LED|%index| %onoff"
+    //% blockId=powerbrick_gc_ledonoff block="Gesture/Color LED|%index|On/Off %onoff"
     //% weight=25
     export function GC_LEDONOFF(index: GCLed, onoff: GCOnOff): void {
         let buf = pins.createBuffer(3)
@@ -542,7 +542,7 @@ namespace powerbrick {
     //% blockId=powerbrick_gc_rgb block="Gesture/Color RGB|%rgb"
     //% weight=20
     export function GC_RGB(rgb: GCRgb): number {
-        pins.i2cWriteNumber(KC_ADDR, KC_READCOLOR, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(KC_ADDR, KC_READCOLORRAW, NumberFormat.UInt8BE);
         let buff = pins.i2cReadBuffer(KC_ADDR, 4);
         return buff[rgb];
     }
