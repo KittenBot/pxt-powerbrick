@@ -32,6 +32,7 @@ namespace powerbrick {
     const KC_READCOLORRAW = 23
     const KC_LEDPWM = 24
     const KC_LEDONOFF = 25
+    const KC_LEDBIT = 26
     const KC_PROXIMITY = 31
     const KC_GESTURE = 41
 
@@ -527,20 +528,30 @@ namespace powerbrick {
         basic.pause(1)
     }
 
-    //% blockId=powerbrick_gc_proximity block="Gesture/Color Proximity"
+    //% blockId=powerbrick_gc_ledbit block="Gesture/Color LED1 %l1 |LED2 %l2 |LED3 %l3 |LED4 %l4"
     //% weight=24
+    export function GC_LEDBIT(l1: GCOnOff, l2: GCOnOff, l3: GCOnOff, l4: GCOnOff): void {
+        let buf = pins.createBuffer(2)
+        buf[0] = KC_LEDBIT
+        buf[1] = l1 * 1 + l2 * 2 + l3 * 4 + l4 * 8;       
+        pins.i2cWriteBuffer(KC_ADDR, buf)
+        basic.pause(1)
+    }
+
+    //% blockId=powerbrick_gc_proximity block="Gesture/Color Proximity"
+    //% weight=23
     export function GC_PROXIMITY(): number {
         return i2cread(KC_ADDR, KC_PROXIMITY)
     }
 
     //% blockId=powerbrick_gc_gesture block="Gesture/Color last gesture"
-    //% weight=23
+    //% weight=22
     export function GC_Gesture(): number {
         return i2cread(KC_ADDR, KC_GESTURE)
     }
 
     //% blockId=powerbrick_gc_rgb block="Gesture/Color RGB|%rgb"
-    //% weight=20
+    //% weight=21
     export function GC_RGB(rgb: GCRgb): number {
         pins.i2cWriteNumber(KC_ADDR, KC_READCOLORRAW, NumberFormat.UInt8BE);
         let buff = pins.i2cReadBuffer(KC_ADDR, 4);
