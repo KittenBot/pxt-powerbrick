@@ -72,13 +72,27 @@ namespace powerbrick {
     }
 
     export enum PrevNext {
-        Prev = 0xac,
-        Next = 0xad
+        Play = 0xaa,
+        Next = 0xac,
+        Prev = 0xad
+    }
+
+    export enum GCLed {
+        All = 0,
+        LED1 = 1,
+        LED2 = 2,
+        LED3 = 3,
+        LED4 = 4
     }
 
     export enum Slots {
         A = 0,
         B = 1
+    }
+
+    export enum GCOnOff {
+        On = 1,
+        Off = 0
     }
 
     export enum DHT11Type {
@@ -441,6 +455,9 @@ namespace powerbrick {
     //% weight=37
     export function MP3PlayIndex(index: number): void {
         let buf = pins.createBuffer(7);
+        if (index == 0) {
+            index = 1;
+        }
         buf[0] = 0x7e;
         buf[1] = 0x05;
         buf[2] = 0xa2;
@@ -491,20 +508,23 @@ namespace powerbrick {
         return buff[1];
     }
 
-    //% blockId=powerbrick_gc_ledpwm block="Gesture/Color LED pwm|%pwm"
+    //% blockId=powerbrick_gc_ledpwm block="Gesture/Color LED Brightness|%pwm"
+    //% pwm.min=0 pwm.max=255
+    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     //% weight=26
     export function GC_LEDPWM(pwm: number): void {
         i2cwrite(KC_ADDR, KC_LEDPWM, pwm);
     }
 
-    //% blockId=powerbrick_gc_ledonoff block="Gesture/Color LED|index %index|onoff %onoff"
+    //% blockId=powerbrick_gc_ledonoff block="Gesture/Color LED|%index| %onoff"
     //% weight=25
-    export function GC_LEDONOFF(index: number, onoff: number): void {
+    export function GC_LEDONOFF(index: GCLed, onoff: GCOnOff): void {
         let buf = pins.createBuffer(3)
         buf[0] = KC_LEDONOFF
         buf[1] = index
         buf[2] = onoff
         pins.i2cWriteBuffer(KC_ADDR, buf)
+        basic.pause(1)
     }
 
     //% blockId=powerbrick_gc_proximity block="Gesture/Color Proximity"
