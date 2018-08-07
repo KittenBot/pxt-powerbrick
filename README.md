@@ -1,6 +1,6 @@
-# pxt-backpack
+# pxt-powerbrick
 
-Extension for microbit backpack module
+Extension for microbit powerbrick module
 
 ## Feature
 
@@ -18,5 +18,5 @@ MIT
 (The metadata above is needed for package search.)
 
 ```package
-robotbit=github:Kittenbot/pxt-backpack
+robotbit=github:Kittenbot/pxt-powerbrick
 ```

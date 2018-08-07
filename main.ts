@@ -7,7 +7,7 @@ dht11 port from MonadnockSystems/pxt-dht11
 */
 
 
-//% color="#13c2c2" weight=10 icon="\uf17b"
+//% color="#13c2c2" weight=10 icon="\uf0e7"
 namespace powerbrick {
     const PCA9685_ADDRESS = 0x40
     const MODE1 = 0x00
@@ -119,12 +119,6 @@ namespace powerbrick {
     export enum Motors {
         M1 = 0x1,
         M2 = 0x2
-    }
-
-    export enum BumperEvent {
-        Down = DAL.MICROBIT_BUTTON_EVT_DOWN,
-        Up = DAL.MICROBIT_BUTTON_EVT_UP,
-        Click = DAL.MICROBIT_BUTTON_EVT_CLICK,
     }
 
     export enum TracerEvent {
@@ -244,14 +238,6 @@ namespace powerbrick {
         pins.i2cWriteBuffer(PCA9685_ADDRESS, buf);
     }
 
-
-    //% blockId=powerbrick_init block="powerbrick Init"
-    //% weight=100
-    //% blockGap=50
-    export function Init(): void {
-
-    }
-
     //% blockId=powerbrick_ultrasonic block="Ultrasonic|port %port"
     //% weight=91
     export function Ultrasonic(port: Ports): number {
@@ -291,12 +277,13 @@ namespace powerbrick {
         return pins.digitalReadPin(pin)
     }
 
-    //% blockId=powerbrick_onTracerEvent block="on Tracer|%port|slot %slot|%event"
+    //% blockId=powerbrick_onTracerEvent block="on Tracer|%port|slot %slot"
     //% weight=80
     //% blockGap=50
-    export function onTracerEvent(port: Ports, slot: Slots, event: TracerEvent, handler: Action): void {
+    export function onTracerEvent(port: Ports, slot: Slots, handler: () => void): void {
         let pin = PortDigi[port][slot]
-        control.onEvent(<number>pin, <number>event, handler);
+        pins.setPull(pin, PinPullMode.PullUp)
+        pins.onPulsed(pin, PulseValue.High, handler)
     }
 
     //% blockId=powerbrick_bumper block="Bumper|port %port|slot %slot"
@@ -307,13 +294,13 @@ namespace powerbrick {
         return pins.digitalReadPin(pin)
     }
 
-    //% blockId=powerbrick_onBumperEvent block="on Bumper|%port|slot %slot|%event"
+    //% blockId=powerbrick_onBumperEvent block="on Bumper|%port|slot %slot"
     //% weight=70
-    export function onBumperEvent(port: Ports, slot: Slots, event: BumperEvent, handler: Action): void {
+    export function onBumperEvent(port: Ports, slot: Slots, handler: () => void): void {
         let pin = PortDigi[port][slot]
-        control.onEvent(<number>pin, <number>event, handler);
+        pins.setPull(pin, PinPullMode.PullUp)
+        pins.onPulsed(pin, PulseValue.High, handler)
     }
-
 
 
     //% blockId=powerbrick_dht11 block="DHT11|port %port|type %readtype"
@@ -341,7 +328,7 @@ namespace powerbrick {
         // 50hz: 20,000 us
         let v_us = ((degree - 90) * 20 / 3 + 1500) // 0.6 ~ 2.4
         let value = v_us * 4096 / 20000
-        serial.writeValue("" + index, v_us)
+        // serial.writeValue("" + index, v_us)
         setPwm(index, 0, value)
     }
 
@@ -528,7 +515,7 @@ namespace powerbrick {
         basic.pause(1)
     }
 
-    //% blockId=powerbrick_gc_ledbit block="Gesture/Color LED1 %l1 |LED2 %l2 |LED3 %l3 |LED4 %l4"
+    //% blockId=powerbrick_gc_ledbit block="Gesture/Color|LED1 %l1|LED2 %l2|LED3 %l3|LED4 %l4"
     //% weight=24
     export function GC_LEDBIT(l1: GCOnOff, l2: GCOnOff, l3: GCOnOff, l4: GCOnOff): void {
         let buf = pins.createBuffer(2)
