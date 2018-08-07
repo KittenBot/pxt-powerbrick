@@ -8,6 +8,7 @@ dht11 port from MonadnockSystems/pxt-dht11
 
 
 //% color="#13c2c2" weight=10 icon="\uf0e7"
+//% groups='["Ultrasonic/Sound", "Tracer", "Bumper", "Weather", "Actuator", "Color/Gesture", "Mp3"]'
 namespace powerbrick {
     const PCA9685_ADDRESS = 0x40
     const MODE1 = 0x00
@@ -228,7 +229,9 @@ namespace powerbrick {
     function setPwm(channel: number, on: number, off: number): void {
         if (channel < 0 || channel > 15)
             return;
-
+        //serial.writeValue("channel", channel)
+        //serial.writeValue("on", on)
+        //serial.writeValue("off", off)
         let buf = pins.createBuffer(5);
         buf[0] = LED0_ON_L + 4 * channel;
         buf[1] = on & 0xff;
@@ -239,7 +242,7 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_ultrasonic block="Ultrasonic|port %port"
-    //% weight=91
+    //% group="Ultrasonic/Sound" weight=91
     export function Ultrasonic(port: Ports): number {
         // send pulse
         let pin = PortDigi[port][0]
@@ -263,23 +266,23 @@ namespace powerbrick {
 
     //% blockId=powerbrick_sound block="Sound|port %port"
     //% weight=90
-    //% blockGap=50
+    //% group="Ultrasonic/Sound" blockGap=50
     export function SoundSensor(port: Ports): number {
         let pin = PortAnalog[port]
-        return pins.analogReadPin(pin)
+        return Math.abs(pins.analogReadPin(pin) - 690)
     }
 
     //% blockId=powerbrick_tracer block="Tracer|port %port|slot %slot"
-    //% weight=81
-    export function Tracer(port: Ports, slot: Slots): number {
+    //% group="Tracer" weight=81
+    export function Tracer(port: Ports, slot: Slots): boolean {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
-        return pins.digitalReadPin(pin)
+        return pins.digitalReadPin(pin) == 1
     }
 
     //% blockId=powerbrick_onTracerEvent block="on Tracer|%port|slot %slot"
     //% weight=80
-    //% blockGap=50
+    //% group="Tracer" blockGap=50
     export function onTracerEvent(port: Ports, slot: Slots, handler: () => void): void {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
@@ -287,15 +290,15 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_bumper block="Bumper|port %port|slot %slot"
-    //% weight=71
-    export function Bumper(port: Ports, slot: Slots): number {
+    //% group="Bumper" weight=71
+    export function Bumper(port: Ports, slot: Slots): boolean {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
-        return pins.digitalReadPin(pin)
+        return pins.digitalReadPin(pin) == 1
     }
 
     //% blockId=powerbrick_onBumperEvent block="on Bumper|%port|slot %slot"
-    //% weight=70
+    //% group="Bumper" weight=70
     export function onBumperEvent(port: Ports, slot: Slots, handler: () => void): void {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
@@ -305,7 +308,7 @@ namespace powerbrick {
 
     //% blockId=powerbrick_dht11 block="DHT11|port %port|type %readtype"
     //% weight=60
-    //% blockGap=50
+    //% group="Weather" blockGap=50
     export function DHT11(port: Ports, readtype: DHT11Type): number {
         let pin = PortDigi[port][0]
         dht11Update(pin)
@@ -320,7 +323,7 @@ namespace powerbrick {
     //% weight=50
     //% blockGap=50
     //% degree.min=-45 degree.max=225
-    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    //% group="Actuator" name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function Servo(index: Servos, degree: number): void {
         if (!initialized) {
             initPCA9685()
@@ -328,14 +331,13 @@ namespace powerbrick {
         // 50hz: 20,000 us
         let v_us = ((degree - 90) * 20 / 3 + 1500) // 0.6 ~ 2.4
         let value = v_us * 4096 / 20000
-        // serial.writeValue("" + index, v_us)
         setPwm(index, 0, value)
     }
 
     //% blockId=powerbrick_motor_run block="Motor|%index|speed %speed"
     //% weight=44
     //% speed.min=-255 speed.max=255
-    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    //% group="Actuator" name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function MotorRun(index: Motors, speed: number): void {
         if (!initialized) {
             initPCA9685()
@@ -365,7 +367,7 @@ namespace powerbrick {
     //% weight=43
     //% speed1.min=-255 speed1.max=255
     //% speed2.min=-255 speed2.max=255
-    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    //% group="Actuator" name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function MotorRunDual(speed1: number, speed2: number): void {
         MotorRun(0, speed1);
         MotorRun(1, speed2);
@@ -374,7 +376,7 @@ namespace powerbrick {
     //% blockId=powerbrick_motor_rundelay block="Motor|%index|speed %speed|delay %delay|s"
     //% weight=42
     //% speed.min=-255 speed.max=255
-    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    //% group="Actuator" name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function MotorRunDelay(index: Motors, speed: number, delay: number): void {
         MotorRun(index, speed);
         basic.pause(delay * 1000);
@@ -382,17 +384,17 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_stop block="Motor Stop|%index|"
-    //% weight=41
+    //% group="Actuator" weight=41
     export function MotorStop(index: Motors): void {
         MotorRun(index, 0);
     }
 
     //% blockId=powerbrick_stop_all block="Motor Stop All"
     //% weight=40
-    //% blockGap=50
+    //% group="Actuator" blockGap=50
     export function MotorStopAll(): void {
-        MotorRun(0, 0);
         MotorRun(1, 0);
+        MotorRun(2, 0);
     }
 
     function calcSum(buf: Buffer, start: number, end: number): number {
@@ -404,7 +406,7 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_mp3_connect block="MP3 Connect|port %port"
-    //% weight=39
+    //% group="MP3" weight=39
     export function MP3Connect(port: SerialPorts): void {
         let pin0 = PortSerial[port][0]
         let pin1 = PortSerial[port][1]
@@ -413,7 +415,7 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_mp3_play block="MP3 Play|%PrevNext"
-    //% weight=38
+    //% group="MP3" weight=38
     export function MP3Play(pn: PrevNext): void {
         let buf = pins.createBuffer(5);
         buf[0] = 0x7e;
@@ -427,7 +429,7 @@ namespace powerbrick {
     //% blockId=powerbrick_mp3_volumn block="MP3 Volumn|%volumn"
     //% volumn.min=0 volumn.max=31
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
-    //% weight=37
+    //% group="MP3" weight=37
     export function MP3Volumn(volumn: number): void {
         let buf = pins.createBuffer(6);
         buf[0] = 0x7e;
@@ -440,7 +442,7 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_mp3_playindex block="MP3 Play Index|%index"
-    //% weight=37
+    //% group="MP3" weight=37
     export function MP3PlayIndex(index: number): void {
         let buf = pins.createBuffer(7);
         if (index == 0) {
@@ -458,7 +460,7 @@ namespace powerbrick {
 
     //% blockId=powerbrick_mp3_playname block="MP3 Play Name|%name"
     //% weight=36
-    //% blockGap=50
+    //% group="MP3" blockGap=50
     export function MP3PlayName(str: string): void {
         let len = str.length;
         if (len > 8) len = 8;
@@ -475,13 +477,13 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_gc_mode block="Gesture/Color mode|%mode"
-    //% weight=29
+    //% group="Color/Gesture" weight=29
     export function GC_MODE(mode: GCMode): void {
         i2cwrite(KC_ADDR, KC_MODE, mode);
     }
 
     //% blockId=powerbrick_gc_color block="Gesture/Color Color"
-    //% weight=28
+    //% group="Color/Gesture" weight=28
     export function GC_Color(): number {
         pins.i2cWriteNumber(KC_ADDR, KC_READCOLOR, NumberFormat.UInt8BE);
         let buff = pins.i2cReadBuffer(KC_ADDR, 2);
@@ -489,7 +491,7 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_gc_brightness block="Gesture/Color Brightness"
-    //% weight=27
+    //% group="Color/Gesture" weight=27
     export function GC_Brightness(): number {
         pins.i2cWriteNumber(KC_ADDR, KC_READCOLOR, NumberFormat.UInt8BE);
         let buff = pins.i2cReadBuffer(KC_ADDR, 2);
@@ -499,13 +501,13 @@ namespace powerbrick {
     //% blockId=powerbrick_gc_ledpwm block="Gesture/Color LED Brightness|%pwm"
     //% pwm.min=0 pwm.max=255
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
-    //% weight=26
+    //% group="Color/Gesture" weight=26
     export function GC_LEDPWM(pwm: number): void {
         i2cwrite(KC_ADDR, KC_LEDPWM, pwm);
     }
 
     //% blockId=powerbrick_gc_ledonoff block="Gesture/Color LED|%index|On/Off %onoff"
-    //% weight=25
+    //% group="Color/Gesture" weight=25
     export function GC_LEDONOFF(index: GCLed, onoff: GCOnOff): void {
         let buf = pins.createBuffer(3)
         buf[0] = KC_LEDONOFF
@@ -516,7 +518,7 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_gc_ledbit block="Gesture/Color|LED1 %l1|LED2 %l2|LED3 %l3|LED4 %l4"
-    //% weight=24
+    //% group="Color/Gesture" weight=24
     export function GC_LEDBIT(l1: GCOnOff, l2: GCOnOff, l3: GCOnOff, l4: GCOnOff): void {
         let buf = pins.createBuffer(2)
         buf[0] = KC_LEDBIT
@@ -526,19 +528,19 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_gc_proximity block="Gesture/Color Proximity"
-    //% weight=23
+    //% group="Color/Gesture" weight=23
     export function GC_PROXIMITY(): number {
         return i2cread(KC_ADDR, KC_PROXIMITY)
     }
 
     //% blockId=powerbrick_gc_gesture block="Gesture/Color last gesture"
-    //% weight=22
+    //% group="Color/Gesture" weight=22
     export function GC_Gesture(): number {
         return i2cread(KC_ADDR, KC_GESTURE)
     }
 
     //% blockId=powerbrick_gc_rgb block="Gesture/Color RGB|%rgb"
-    //% weight=21
+    //% group="Color/Gesture" weight=21
     export function GC_RGB(rgb: GCRgb): number {
         pins.i2cWriteNumber(KC_ADDR, KC_READCOLORRAW, NumberFormat.UInt8BE);
         let buff = pins.i2cReadBuffer(KC_ADDR, 4);
