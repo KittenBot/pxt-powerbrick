@@ -74,8 +74,11 @@ namespace powerbrick {
     }
 
     export enum PrevNext {
+        //% block=play
         Play = 0xaa,
+        //% block=next
         Next = 0xac,
+        //% block=prev
         Prev = 0xad
     }
 
@@ -98,7 +101,9 @@ namespace powerbrick {
     }
 
     export enum DHT11Type {
+        //% block=temperature
         Temperature = 0,
+        //% block=humidity
         Humidity = 1
     }
 
@@ -128,15 +133,22 @@ namespace powerbrick {
     }
 
     export enum GCMode {
+        //% block=colorsensor
         ColorSensor = 0x1,
+        //% block=proximity
         Proximity = 0x2,
+        //% block=gesture
         Gesture = 0x3
     }
 
     export enum GCRgb {
+        //% block=brightness
         Brightness = 0,
+        //% block=red
         Red = 1,
+        //% block=green
         Green = 2,
+        //% block=blue
         Blue = 3
     }
 
@@ -482,7 +494,7 @@ namespace powerbrick {
         i2cwrite(KC_ADDR, KC_MODE, mode);
     }
 
-    //% blockId=powerbrick_gc_color block="Gesture/Color Color"
+    //% blockId=powerbrick_gc_color block="Gesture/Color Color Hue"
     //% group="Color/Gesture" weight=28
     export function GC_Color(): number {
         pins.i2cWriteNumber(KC_ADDR, KC_READCOLOR, NumberFormat.UInt8BE);
@@ -522,7 +534,7 @@ namespace powerbrick {
     export function GC_LEDBIT(l1: GCOnOff, l2: GCOnOff, l3: GCOnOff, l4: GCOnOff): void {
         let buf = pins.createBuffer(2)
         buf[0] = KC_LEDBIT
-        buf[1] = l1 * 1 + l2 * 2 + l3 * 4 + l4 * 8;       
+        buf[1] = l1 * 1 + l2 * 2 + l3 * 4 + l4 * 8;
         pins.i2cWriteBuffer(KC_ADDR, buf)
         basic.pause(1)
     }
