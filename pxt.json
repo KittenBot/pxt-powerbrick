@@ -1,6 +1,6 @@
 {
     "name": "pxt-powerbrick",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Powerbrick series module for microbit",
     "license": "MIT",
     "dependencies": {
