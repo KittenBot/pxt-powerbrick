@@ -1,0 +1,20 @@
+{
+    "target": "microbit",
+    "targetVersion": "1.1.40",
+    "name": "powerbrick",
+    "meta": {},
+    "editor": "blocksprj",
+    "pubId": "",
+    "pubCurrent": false,
+    "_rev": null,
+    "id": "286a5d5b-8fde-4bcd-dad7-cdb338470a29",
+    "recentUse": 1534750381,
+    "modificationTime": 1534750366,
+    "blobId": null,
+    "blobVersion": null,
+    "blobCurrent": false,
+    "isDeleted": false,
+    "path": "pxt-powerbrick",
+    "githubCurrent": false,
+    "saveId": null
+}

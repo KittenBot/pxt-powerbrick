@@ -1,6 +1,6 @@
-# pxt-powerbrick
+# powerbrick
 
-Extension for microbit powerbrick module
+Extension for Kittenbot powerbrick module series
 
 ## Feature
 
@@ -18,5 +18,5 @@ MIT
 (The metadata above is needed for package search.)
 
 ```package
-robotbit=github:Kittenbot/pxt-powerbrick
+powerbrick=github:Kittenbot/pxt-powerbrick
 ```

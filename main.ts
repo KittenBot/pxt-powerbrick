@@ -289,7 +289,7 @@ namespace powerbrick {
     export function Tracer(port: Ports, slot: Slots): boolean {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
-        return pins.digitalReadPin(pin) == 1
+        return pins.digitalReadPin(pin) == 0
     }
 
     //% blockId=powerbrick_onTracerEvent block="on Tracer|%port|slot %slot"
@@ -298,7 +298,7 @@ namespace powerbrick {
     export function onTracerEvent(port: Ports, slot: Slots, handler: () => void): void {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
-        pins.onPulsed(pin, PulseValue.High, handler)
+        pins.onPulsed(pin, PulseValue.Low, handler)
     }
 
     //% blockId=powerbrick_bumper block="Bumper|port %port|slot %slot"
@@ -306,7 +306,7 @@ namespace powerbrick {
     export function Bumper(port: Ports, slot: Slots): boolean {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
-        return pins.digitalReadPin(pin) == 1
+        return pins.digitalReadPin(pin) == 0
     }
 
     //% blockId=powerbrick_onBumperEvent block="on Bumper|%port|slot %slot"
@@ -314,7 +314,7 @@ namespace powerbrick {
     export function onBumperEvent(port: Ports, slot: Slots, handler: () => void): void {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
-        pins.onPulsed(pin, PulseValue.High, handler)
+        pins.onPulsed(pin, PulseValue.Low, handler)
     }
 
 
@@ -330,6 +330,23 @@ namespace powerbrick {
             return dht11Humi;
         }
     }
+
+    //% blockId=powerbrick_soil block="Soil|port %port"
+    //% weight=60
+    //% group="Weather" blockGap=50
+    export function Soil(port: Ports): number {
+        let pin = PortAnalog[port]
+        return pins.analogReadPin(pin)
+    }
+
+    //% blockId=powerbrick_waterlevel block="Water level |port %port"
+    //% weight=60
+    //% group="Weather" blockGap=50
+    export function WaterLevel(port: Ports): number {
+        let pin = PortAnalog[port]
+        return pins.analogReadPin(pin)
+    }
+
 
     //% blockId=powerbrick_servo block="Servo|%index|degree %degree"
     //% weight=50
