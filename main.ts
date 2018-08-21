@@ -8,7 +8,7 @@ dht11 port from MonadnockSystems/pxt-dht11
 
 
 //% color="#13c2c2" weight=10 icon="\uf0e7"
-//% groups='["Ultrasonic/Sound", "Tracer", "Bumper", "Weather", "Actuator", "Color/Gesture", "Mp3"]'
+//% groups='["Ultrasonic/Sound", "Tracer", "Bumper", "Weather", "Actuator", "Color/Gesture", "Mp3", "RFID"]'
 namespace powerbrick {
     const PCA9685_ADDRESS = 0x40
     const MODE1 = 0x00
@@ -36,6 +36,14 @@ namespace powerbrick {
     const KC_LEDBIT = 26
     const KC_PROXIMITY = 31
     const KC_GESTURE = 41
+
+    const RFID_ADDR = 0x6B
+    const RFID_VERSION = 0x00
+    const RFID_READCMD = 0x01
+    const RFID_READOUT = 0x02
+    const RFID_WRITE = 0x03
+    const RFID_STOP = 0x04
+    const RFID_STATUS = 0x05
 
     const PortDigi = [
         [DigitalPin.P8, DigitalPin.P0],
@@ -120,6 +128,30 @@ namespace powerbrick {
         S10 = 6,
         S11 = 5,
         S12 = 4
+    }
+
+    export enum RfidSector {
+        S1 = 1,
+        S2 = 2,
+        S3 = 3,
+        S4 = 4,
+        S5 = 5,
+        S6 = 6,
+        S7 = 7,
+        S8 = 8,
+        S9 = 9,
+        S10 = 10,
+        S11 = 11,
+        S12 = 12,
+        S13 = 13,
+        S14 = 14,
+        S15 = 15
+    }
+
+    export enum RfidBlock {
+        B0 = 0,
+        B1 = 1,
+        B2 = 2
     }
 
     export enum Motors {
@@ -570,10 +602,33 @@ namespace powerbrick {
 
     //% blockId=powerbrick_gc_rgb block="Gesture/Color RGB|%rgb"
     //% group="Color/Gesture" weight=21
+    //% blockGap = 50
     export function GC_RGB(rgb: GCRgb): number {
         pins.i2cWriteNumber(KC_ADDR, KC_READCOLORRAW, NumberFormat.UInt8BE);
         let buff = pins.i2cReadBuffer(KC_ADDR, 4);
         return buff[rgb];
     }
+
+    //% blockId=powerbrick_rfidwrite block="RFID Write sector|%sector block|%block text|%txt"
+    //% weight=20
+    //% group="RFID" 
+    export function RfidWrite(sector: RfidSector, block: RfidBlock, txt: string): void {
+
+    }
+
+    //% blockId=powerbrick_rfidread block="RFID Read sector|%sector block|%block"
+    //% weight=18
+    //% group="RFID" 
+    export function RfidRead(sector: RfidSector, block: RfidBlock): string {
+        return ""
+    }
+
+    //% blockId=powerbrick_rfidstop block="RFID Stop"
+    //% weight=16
+    //% group="RFID" 
+    export function RfidStop(): void {
+
+    }
+
 
 }
