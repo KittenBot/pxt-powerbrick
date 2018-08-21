@@ -45,6 +45,14 @@ namespace powerbrick {
     const RFID_STOP = 0x04
     const RFID_STATUS = 0x05
 
+    enum RfidStat {
+        IDLE = 0,
+        READ_PENDING = 1,
+        READ_SUCC = 2,
+        WRITE_PENDING = 3,
+        WRITE_SUCC = 4
+    }
+
     const PortDigi = [
         [DigitalPin.P8, DigitalPin.P0],
         [DigitalPin.P12, DigitalPin.P1],
@@ -620,7 +628,26 @@ namespace powerbrick {
     //% weight=18
     //% group="RFID" 
     export function RfidRead(sector: RfidSector, block: RfidBlock): string {
-        return ""
+        let stat = i2cread(RFID_ADDR, RFID_STATUS);
+        serial.writeValue('stat', stat)
+        let ret = ''
+        if (stat == RfidStat.READ_SUCC) {
+            // get all data from last reading
+            pins.i2cWriteNumber(RFID_ADDR, RFID_READOUT, NumberFormat.UInt8BE);
+            let rxbuf = pins.i2cReadBuffer(RFID_ADDR, 16)
+            serial.writeLine(rxbuf.toHex())
+            for (let i=0;i<16;i++){
+                ret+=String.fromCharCode(rxbuf[i])
+            }
+        }
+
+        let buf = pins.createBuffer(3)
+        buf[0] = RFID_READCMD
+        buf[1] = sector
+        buf[2] = block
+        pins.i2cWriteBuffer(RFID_ADDR, buf)
+
+        return ret
     }
 
     //% blockId=powerbrick_rfidstop block="RFID Stop"
