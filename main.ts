@@ -4,11 +4,12 @@ Microbit powerbrick extension board
 load dependency
 "powerbrick": "file:../pxt-powerbrick"
 dht11 port from MonadnockSystems/pxt-dht11
+rgb pixel port from Microsoft/pxt-neopixel
 */
 
 
 //% color="#13c2c2" weight=10 icon="\uf0e7"
-//% groups='["Ultrasonic/Sound", "Tracer", "Bumper", "Weather", "Actuator", "Color/Gesture", "Mp3", "RFID"]'
+//% groups='["Ultrasonic/Sound", "Tracer", "Bumper", "Weather", "Actuator", "Color/Gesture", "Mp3", "RFID", "RGB"]'
 namespace powerbrick {
     const PCA9685_ADDRESS = 0x40
     const MODE1 = 0x00
@@ -46,6 +47,9 @@ namespace powerbrick {
     const RFID_STATUS = 0x05
     const RFID_UUID = 0x06
 
+    const RGB_PIX = 64
+    const RGB_M = 8;
+
     enum RfidStat {
         IDLE = 0,
         SELECTED = 1,
@@ -60,7 +64,7 @@ namespace powerbrick {
         [DigitalPin.P13, DigitalPin.P2],
         [DigitalPin.P15, DigitalPin.P14],
         [DigitalPin.P6, DigitalPin.P3],
-        [DigitalPin.P7, DigitalPin.P5],
+        [DigitalPin.P7, DigitalPin.P4],
         [DigitalPin.P9, DigitalPin.P10]
     ]
 
@@ -118,8 +122,10 @@ namespace powerbrick {
     }
 
     export enum DHT11Type {
-        //% block=temperature
-        Temperature = 0,
+        //% block=temperature(°C)
+        TemperatureC = 0,
+        //% block=temperature(°F)
+        TemperatureF = 1,
         //% block=humidity
         Humidity = 1
     }
@@ -195,6 +201,15 @@ namespace powerbrick {
 
     type EvtAct = () => void;
     let onRfidPresent: EvtAct = null;
+    let rgbBuf: Buffer = pins.createBuffer(RGB_PIX * 3);
+    let rgbPin: DigitalPin;
+    let rgbBright: number = 50;
+
+    function setBufferRGB(offset: number, red: number, green: number, blue: number): void {
+        rgbBuf[offset + 0] = red;
+        rgbBuf[offset + 1] = green;
+        rgbBuf[offset + 2] = blue;
+    }
 
     function dht11Update(pin: DigitalPin): number {
         let loopCnt = 50;
@@ -322,7 +337,7 @@ namespace powerbrick {
     //% group="Ultrasonic/Sound" blockGap=50
     export function SoundSensor(port: Ports): number {
         let pin = PortAnalog[port]
-        return Math.abs(pins.analogReadPin(pin) - 690)
+        return pins.analogReadPin(pin)
     }
 
     //% blockId=powerbrick_tracer block="Tracer|port %port|slot %slot"
@@ -365,8 +380,10 @@ namespace powerbrick {
     export function DHT11(port: Ports, readtype: DHT11Type): number {
         let pin = PortDigi[port][0]
         dht11Update(pin)
-        if (readtype == DHT11Type.Temperature) {
+        if (readtype == DHT11Type.TemperatureC) {
             return dht11Temp;
+        } else if (readtype == DHT11Type.TemperatureF) {
+            return ((dht11Temp & 0x0000ff00) >> 8) * 9 / 5 + 32;
         } else {
             return dht11Humi;
         }
@@ -701,5 +718,211 @@ namespace powerbrick {
         pins.i2cWriteBuffer(RFID_ADDR, buf)
     }
 
+    /**
+     * Shows a rainbow pattern on all LEDs. 
+     * @param startHue the start hue value for the rainbow, eg: 1
+     * @param endHue the end hue value for the rainbow, eg: 360
+     */
+    //% blockId="powerbrick_rgbrainbow" block="show rainbow %port from %startHue|to %endHue"
+    //% weight=85 blockGap=8
+    //% group="RGB" 
+    export function showRainbow(port: Ports, startHue: number = 1, endHue: number = 360) {
+
+        rgbPin = PortDigi[port][0];
+
+        const saturation = 100;
+        const luminance = 50;
+        const steps = RGB_PIX;
+
+        //hue
+        const h1 = startHue;
+        const h2 = endHue;
+        const hDistCW = ((h2 + 360) - h1) % 360;
+        const hStepCW = Math.idiv((hDistCW * 100), steps);
+        const hDistCCW = ((h1 + 360) - h2) % 360;
+        const hStepCCW = Math.idiv(-(hDistCCW * 100), steps);
+        let hStep: number;
+        hStep = hStepCW;
+
+        const h1_100 = h1 * 100; //we multiply by 100 so we keep more accurate results while doing interpolation
+        //sat
+        const s1 = saturation;
+        const s2 = saturation;
+        const sDist = s2 - s1;
+        const sStep = Math.idiv(sDist, steps);
+        const s1_100 = s1 * 100;
+
+        //lum
+        const l1 = luminance;
+        const l2 = luminance;
+        const lDist = l2 - l1;
+        const lStep = Math.idiv(lDist, steps);
+        const l1_100 = l1 * 100
+
+        //interpolate
+
+        setPixelRGB(0, hsl(startHue, saturation, luminance));
+        for (let i = 1; i < steps - 1; i++) {
+            const h = Math.idiv((h1_100 + i * hStep), 100) + 360;
+            const s = Math.idiv((s1_100 + i * sStep), 100);
+            const l = Math.idiv((l1_100 + i * lStep), 100);
+            setPixelRGB(i, hsl(h, s, l));
+        }
+        setPixelRGB(steps - 1, hsl(endHue, saturation, luminance));
+        rgbShow();
+    }
+
+    // todo: export this?
+    function hsl(h: number, s: number, l: number): number {
+        h = Math.round(h);
+        s = Math.round(s);
+        l = Math.round(l);
+
+        h = h % 360;
+        s = Math.clamp(0, 99, s);
+        l = Math.clamp(0, 99, l);
+        let c = Math.idiv((((100 - Math.abs(2 * l - 100)) * s) << 8), 10000); //chroma, [0,255]
+        let h1 = Math.idiv(h, 60);//[0,6]
+        let h2 = Math.idiv((h - h1 * 60) * 256, 60);//[0,255]
+        let temp = Math.abs((((h1 % 2) << 8) + h2) - 256);
+        let x = (c * (256 - (temp))) >> 8;//[0,255], second largest component of this color
+        let r$: number;
+        let g$: number;
+        let b$: number;
+        if (h1 == 0) {
+            r$ = c; g$ = x; b$ = 0;
+        } else if (h1 == 1) {
+            r$ = x; g$ = c; b$ = 0;
+        } else if (h1 == 2) {
+            r$ = 0; g$ = c; b$ = x;
+        } else if (h1 == 3) {
+            r$ = 0; g$ = x; b$ = c;
+        } else if (h1 == 4) {
+            r$ = x; g$ = 0; b$ = c;
+        } else if (h1 == 5) {
+            r$ = c; g$ = 0; b$ = x;
+        }
+        let m = Math.idiv((Math.idiv((l * 2 << 8), 100) - c), 2);
+        let r = r$ + m;
+        let g = g$ + m;
+        let b = b$ + m;
+        return packRGB(r, g, b);
+    }
+
+    //% blockId="neopixel_clear" block="RGB %port clear"
+    //% group="RGB" 
+    export function rgbClear(port: Ports): void {
+        rgbPin = PortDigi[port][0];
+        const stride = 3;
+        rgbBuf.fill(0, 0, RGB_PIX * stride);
+        rgbShow();
+    }
+
+    //% blockId=setRGBPix block="RGB %port PIX%pix Color%rgb"
+    //% group="RGB" 
+    export function setRGBPix(port: Ports, pix: number, rgb: number): void {
+        if (pix < 0 || pix >= RGB_PIX)
+            return;
+        pix = pixMap(pix);
+        pix = (pix) * 3;
+
+        let red = unpackR(rgb);
+        let green = unpackG(rgb);
+        let blue = unpackB(rgb);
+
+        let br = rgbBright;
+        if (br < 255) {
+            red = (red * br) >> 8;
+            green = (green * br) >> 8;
+            blue = (blue * br) >> 8;
+        }
+        setBufferRGB(pix, red, green, blue)
+    }
+
+    //% blockId=setRGBXy block="RGB %port X%x Y%y Color%rgb"
+    //% group="RGB" 
+    export function setRGBXy(port: Ports, x: number, y: number, rgb: number): void {
+        setRGBPix(port, x+y*RGB_M, rgb)
+    }
+
+    //% blockId=rgbColor block="Color red %red|green %green|blue %blue"
+    //% group="RGB" 
+    export function rgb(red: number, green: number, blue: number): number {
+        return packRGB(red, green, blue);
+    }
+
+    //% blockId=rgbShow block="RGB show"
+    //% group="RGB" 
+    export function rgbShow() {
+        ws2812b.sendBuffer(rgbBuf, rgbPin);
+    }
+
+    function pinMap(x: number, y: number): number {
+        let t = y;
+        y = x; x = t;
+        if (y % 2 == 1) { // s-type connection on hardware
+            x = RGB_M - x - 1;
+        }
+        let pix = y * RGB_M + x;
+        return pix
+    }
+
+    function pixMap(pix: number): number {
+        let x = pix % RGB_M;
+        let y = Math.floor(pix / RGB_M);
+        return pinMap(x, y)
+    }
+
+
+    function setPixelRGB(pixeloffset: number, rgb: number): void {
+        if (pixeloffset < 0 || pixeloffset >= RGB_PIX)
+            return;
+
+        let stride = 3;
+        pixeloffset = (pixeloffset) * stride;
+
+        let red = unpackR(rgb);
+        let green = unpackG(rgb);
+        let blue = unpackB(rgb);
+
+        let br = rgbBright;
+        if (br < 255) {
+            red = (red * br) >> 8;
+            green = (green * br) >> 8;
+            blue = (blue * br) >> 8;
+        }
+        setBufferRGB(pixeloffset, red, green, blue)
+    }
+
+
+    function packRGB(a: number, b: number, c: number): number {
+        return ((a & 0xFF) << 16) | ((b & 0xFF) << 8) | (c & 0xFF);
+    }
+
+    function unpackR(rgb: number): number {
+        let r = (rgb >> 16) & 0xFF;
+        return r;
+    }
+    function unpackG(rgb: number): number {
+        let g = (rgb >> 8) & 0xFF;
+        return g;
+    }
+    function unpackB(rgb: number): number {
+        let b = (rgb) & 0xFF;
+        return b;
+    }
+
+
+    //% blockId=powerbrick_getpin block="Pin port|%port slot|%slot"
+    //% advanced=true
+    export function GetPin(port: Ports, slot: Slots): DigitalPin {
+        return PortDigi[port][slot];
+    }
+
+    //% blockId=powerbrick_getanalog block="Analog Pin port|%port"
+    //% advanced=true
+    export function GetAnalog(port: Ports, slot: Slots): AnalogPin {
+        return PortAnalog[port];
+    }
 
 }

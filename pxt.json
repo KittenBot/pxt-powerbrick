@@ -1,10 +1,11 @@
 {
     "name": "powerbrick",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "description": "Powerbrick series module for microbit",
     "license": "MIT",
     "dependencies": {
-        "core": "*"
+        "core": "*",
+        "ws2812b": "github:Microsoft/pxt-ws2812b#v0.0.4"
     },
     "files": [
         "README.md",
