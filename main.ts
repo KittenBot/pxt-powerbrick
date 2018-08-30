@@ -44,12 +44,13 @@ namespace powerbrick {
     const RFID_WRITE = 0x03
     const RFID_STOP = 0x04
     const RFID_STATUS = 0x05
+    const RFID_UUID = 0x06
 
     enum RfidStat {
         IDLE = 0,
-        READ_PENDING = 1,
-        READ_SUCC = 2,
-        WRITE_PENDING = 3,
+        SELECTED = 1,
+        READ_PENDING = 2,
+        READ_SUCC = 3,
         WRITE_SUCC = 4
     }
 
@@ -192,6 +193,9 @@ namespace powerbrick {
         Blue = 3
     }
 
+    type EvtAct = () => void;
+    let onRfidPresent: EvtAct = null;
+
     function dht11Update(pin: DigitalPin): number {
         let loopCnt = 50;
         pins.digitalWritePin(pin, 0)
@@ -281,9 +285,6 @@ namespace powerbrick {
     function setPwm(channel: number, on: number, off: number): void {
         if (channel < 0 || channel > 15)
             return;
-        //serial.writeValue("channel", channel)
-        //serial.writeValue("on", on)
-        //serial.writeValue("off", off)
         let buf = pins.createBuffer(5);
         buf[0] = LED0_ON_L + 4 * channel;
         buf[1] = on & 0xff;
@@ -617,8 +618,37 @@ namespace powerbrick {
         return buff[rgb];
     }
 
-    //% blockId=powerbrick_rfidwrite block="RFID Write sector|%sector block|%block text|%txt"
+    //% blockId=powerbrick_rfidprobe block="RFID Probe"
+    //% weight=21
+    //% group="RFID" 
+    export function RfidProbe(): void {
+        let stat = i2cread(RFID_ADDR, RFID_STATUS);
+        if (stat == 1) {
+            if (onRfidPresent) {
+                onRfidPresent();
+                RfidStop();
+            }
+        }
+    }
+
+    //% blockId=powerbrick_onrfidpresent block="RFID Present"
     //% weight=20
+    //% group="RFID" 
+    export function RfidPresent(handler: () => void): void {
+        onRfidPresent = handler;
+    }
+
+    //% blockId=powerbrick_rfiduuid block="RFID UUID"
+    //% weight=19
+    //% group="RFID"
+    export function RfidUUID(): string {
+        pins.i2cWriteNumber(RFID_ADDR, RFID_UUID, NumberFormat.UInt8BE);
+        let uuid = pins.i2cReadBuffer(RFID_ADDR, 4)
+        return uuid.toHex();
+    }
+
+    //% blockId=powerbrick_rfidwrite block="RFID Write sector|%sector block|%block text|%txt"
+    //% weight=18
     //% group="RFID" 
     export function RfidWrite(sector: RfidSector, block: RfidBlock, txt: string): void {
         let buf = pins.createBuffer(19)
@@ -631,39 +661,41 @@ namespace powerbrick {
             buf[3 + i] = txt.charCodeAt(i)
         }
         pins.i2cWriteBuffer(RFID_ADDR, buf)
+        basic.pause(100)
     }
 
     //% blockId=powerbrick_rfidread block="RFID Read sector|%sector block|%block"
-    //% weight=18
+    //% weight=17
     //% group="RFID" 
     export function RfidRead(sector: RfidSector, block: RfidBlock): string {
-        let stat = i2cread(RFID_ADDR, RFID_STATUS);
-        serial.writeValue('stat', stat)
-        let ret = ''
-        if (stat == RfidStat.READ_SUCC) {
-            // get all data from last reading
-            pins.i2cWriteNumber(RFID_ADDR, RFID_READOUT, NumberFormat.UInt8BE);
-            let rxbuf = pins.i2cReadBuffer(RFID_ADDR, 16)
-            for (let i = 0; i < 16; i++) {
-                if (rxbuf[i] >= 0x20 && rxbuf[i] < 0x7f) {
-                    ret += String.fromCharCode(rxbuf[i]) // valid ascii
-                }
-            }
-        }
-
+        let retry: number = 5;
         let buf = pins.createBuffer(3)
         buf[0] = RFID_READCMD
         buf[1] = sector
         buf[2] = block
         pins.i2cWriteBuffer(RFID_ADDR, buf)
-        serial.writeString("[" + ret + "]\n")
-        return ret
+
+        while (retry) {
+            basic.pause(100);
+            let stat = i2cread(RFID_ADDR, RFID_STATUS);
+            if (stat == RfidStat.READ_SUCC) {
+                let ret = '';
+                pins.i2cWriteNumber(RFID_ADDR, RFID_READOUT, NumberFormat.UInt8BE);
+                let rxbuf = pins.i2cReadBuffer(RFID_ADDR, 16)
+                for (let i = 0; i < 16; i++) {
+                    if (rxbuf[i] >= 0x20 && rxbuf[i] < 0x7f) {
+                        ret += String.fromCharCode(rxbuf[i]) // valid ascii
+                    }
+                }
+                return ret;
+            }
+            retry--;
+        }
+        return '';
     }
 
-    //% blockId=powerbrick_rfidstop block="RFID Stop"
-    //% weight=16
-    //% group="RFID" 
-    export function RfidStop(): void {
+
+    function RfidStop(): void {
         let buf = pins.createBuffer(1)
         buf[0] = RFID_STOP
         pins.i2cWriteBuffer(RFID_ADDR, buf)

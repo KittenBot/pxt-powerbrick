@@ -1,6 +1,6 @@
 {
     "target": "microbit",
-    "targetVersion": "1.1.40",
+    "targetVersion": "1.1.45",
     "name": "powerbrick",
     "meta": {},
     "editor": "blocksprj",
@@ -8,8 +8,8 @@
     "pubCurrent": false,
     "_rev": null,
     "id": "286a5d5b-8fde-4bcd-dad7-cdb338470a29",
-    "recentUse": 1534831457,
-    "modificationTime": 1534831457,
+    "recentUse": 1535612692,
+    "modificationTime": 1535612550,
     "blobId": null,
     "blobVersion": null,
     "blobCurrent": false,
