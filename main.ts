@@ -50,6 +50,19 @@ namespace powerbrick {
     const RGB_PIX = 64
     const RGB_M = 8;
 
+    const FontNum = [
+        0xff81ff,
+        0x0000ff,
+        0x8f89f9,
+        0xff8989,
+        0xff080f,
+        0xf9898f,
+        0xf989ff,
+        0xff0101,
+        0xff89ff,
+        0xff898f
+    ]
+
     enum RfidStat {
         IDLE = 0,
         SELECTED = 1,
@@ -231,7 +244,7 @@ namespace powerbrick {
     let rgbBuf: Buffer = pins.createBuffer(RGB_PIX * 3);
     let rgbPin: DigitalPin;
     let rgbBright: number = 30;
-
+    
     function setBufferRGB(offset: number, red: number, green: number, blue: number): void {
         rgbBuf[offset + 0] = green;
         rgbBuf[offset + 1] = red;
@@ -859,8 +872,7 @@ namespace powerbrick {
     //% blockId="neopixel_clear" block="RGB clear"
     //% group="RGB" 
     export function rgbClear(): void {
-        const stride = 3;
-        rgbBuf.fill(0, 0, RGB_PIX * stride);
+        rgbBuf.fill(0, 0, RGB_PIX * 3);
         rgbShow();
     }
 
@@ -882,7 +894,6 @@ namespace powerbrick {
             green = (green * br) >> 8;
             blue = (blue * br) >> 8;
         }
-        serial.writeLine("pix " + pix + " " + red + "\n")
         setBufferRGB(pix, red, green, blue)
     }
 
@@ -890,6 +901,38 @@ namespace powerbrick {
     //% group="RGB" 
     export function setRGBXy(x: number, y: number, rgb: number): void {
         setRGBPix(x + y * RGB_M, rgb)
+    }
+
+    //% blockId=showNum block="Show number %num Color%rgb=neopixel_colors"
+    //% group="RGB" blockGap=16
+    export function showNum(num: number, rgb: number): void {
+        num = num % 100;
+        let n1 = Math.floor(num / 10);
+        let n0 = num % 10;
+        let pix = 0;
+        rgbBuf.fill(0, 0, RGB_PIX * 3);
+        if (n1 >0 ){
+            pix = FontNum[n1];
+            for (let x = 0; x < 3; x++) {
+                let p = (pix >> x * 8) & 0xff;
+                for (let y = 0; y < 8; y++) {
+                    if ((p >> y) & 1) {
+                        setRGBXy(x + 1, y, rgb)
+                    }
+                }
+            }
+        }
+       
+        pix = FontNum[n0];
+        for (let x = 0; x < 3; x++) {
+            let p = (pix >> x * 8) & 0xff;
+            for (let y = 0; y < 8; y++) {
+                if ((p >> y) & 1) {
+                    setRGBXy(x + 5, y, rgb)
+                }
+            }
+        }
+        rgbShow()
     }
 
     //% blockId=neopixel_colors block="%color"
@@ -921,6 +964,26 @@ namespace powerbrick {
     export function rgbShow() {
         ws2812b.sendBuffer(rgbBuf, rgbPin);
     }
+
+    /*
+    export enum RGBIconName {
+        //% block="riven"
+        //% blockImage=1
+        //% iconURL="https://kittenbot.cn/bbs/uc_server/avatar.php?uid=2&size=middle"
+        riven = 0,
+    }
+    
+
+    //% blockId=rgb_show_icon
+    //% block="show icon %i"
+    //% group="RGB" 
+    //% i.fieldEditor="gridpicker"
+    //% i.fieldOptions.width="400" i.fieldOptions.columns="5"
+    //% i.fieldOptions.itemColour="black" i.fieldOptions.tooltips="true"
+    export function showIcon(icon: RGBIconName, interval = 600) {
+
+    }
+    */
 
     function pinMap(x: number, y: number): number {
         let t = y;
@@ -991,3 +1054,4 @@ namespace powerbrick {
     }
 
 }
+
