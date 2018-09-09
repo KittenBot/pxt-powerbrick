@@ -739,18 +739,23 @@ namespace powerbrick {
         pins.i2cWriteBuffer(RFID_ADDR, buf)
     }
 
+
+    //% blockId="powerbrick_rgbattach" block="RGB connect ot %port"
+    //% weight=85 blockGap=8
+    //% group="RGB"
+    export function rgbConnect(port: Ports) {
+        rgbPin = PortDigi[port][0];
+    }
+
     /**
      * Shows a rainbow pattern on all LEDs. 
      * @param startHue the start hue value for the rainbow, eg: 1
      * @param endHue the end hue value for the rainbow, eg: 360
      */
-    //% blockId="powerbrick_rgbrainbow" block="show rainbow %port from %startHue|to %endHue"
+    //% blockId="powerbrick_rgbrainbow" block="show rainbow from %startHue|to %endHue"
     //% weight=85 blockGap=8
     //% group="RGB" 
-    export function showRainbow(port: Ports, startHue: number = 1, endHue: number = 360) {
-
-        rgbPin = PortDigi[port][0];
-
+    export function showRainbow(startHue: number = 1, endHue: number = 360) {
         const saturation = 100;
         const luminance = 50;
         const steps = RGB_PIX;
@@ -793,6 +798,27 @@ namespace powerbrick {
         rgbShow();
     }
 
+    //% blockId="neopixel_set_strip_color" block="show color %rgb=neopixel_colors"
+    //% weight=85 blockGap=8
+    //% group="RGB" 
+    export function showColor(rgb: number) {
+        let red = unpackR(rgb);
+        let green = unpackG(rgb);
+        let blue = unpackB(rgb);
+
+        const br = rgbBright;
+        if (br < 255) {
+            red = (red * br) >> 8;
+            green = (green * br) >> 8;
+            blue = (blue * br) >> 8;
+        }
+        for (let i = 0; i < 64; ++i) {
+            setBufferRGB(i * 3, red, green, blue)
+        }
+
+        rgbShow();
+    }
+
     // todo: export this?
     function hsl(h: number, s: number, l: number): number {
         h = Math.round(h);
@@ -830,19 +856,17 @@ namespace powerbrick {
         return packRGB(r, g, b);
     }
 
-    //% blockId="neopixel_clear" block="RGB %port clear"
+    //% blockId="neopixel_clear" block="RGB clear"
     //% group="RGB" 
-    export function rgbClear(port: Ports): void {
-        rgbPin = PortDigi[port][0];
+    export function rgbClear(): void {
         const stride = 3;
         rgbBuf.fill(0, 0, RGB_PIX * stride);
         rgbShow();
     }
 
-    //% blockId=setRGBPix block="RGB %port PIX%pix Color%rgb=neopixel_colors"
+    //% blockId=setRGBPix block="RGB PIX%pix Color%rgb=neopixel_colors"
     //% group="RGB" 
-    export function setRGBPix(port: Ports, pix: number, rgb: number): void {
-        rgbPin = PortDigi[port][0];
+    export function setRGBPix(pix: number, rgb: number): void {
         if (pix < 0 || pix >= RGB_PIX)
             return;
         pix = pixMap(pix);
@@ -862,10 +886,16 @@ namespace powerbrick {
         setBufferRGB(pix, red, green, blue)
     }
 
-    //% blockId=setRGBXy block="RGB %port X%x Y%y Color%rgb=neopixel_colors"
+    //% blockId=setRGBXy block="RGB X%x Y%y Color%rgb=neopixel_colors"
     //% group="RGB" 
-    export function setRGBXy(port: Ports, x: number, y: number, rgb: number): void {
-        setRGBPix(port, x + y * RGB_M, rgb)
+    export function setRGBXy(x: number, y: number, rgb: number): void {
+        setRGBPix(x + y * RGB_M, rgb)
+    }
+
+    //% blockId=neopixel_colors block="%color"
+    //% group="RGB" 
+    export function colors(color: NeoPixelColors): number {
+        return color;
     }
 
     //% blockId=rgbColor block="Color red %red|green %green|blue %blue"
@@ -875,18 +905,15 @@ namespace powerbrick {
     }
 
     //% blockId=rgbBrightness block="RGB brightness %brightness"
-    //% group="RGB" 
+    //% group="RGB" blockGap=16
     export function setBrightness(brightness: number): void {
         rgbBright = brightness & 0xff
     }
 
-    /**
-     * Gets the RGB value of a known color
-    */
-    //% blockId=neopixel_colors block="%color"
+    //% blockId=rgbPixRotate block="rotate pixels by %offset"
     //% group="RGB" 
-    export function colors(color: NeoPixelColors): number {
-        return color;
+    export function rgbPixRotate(offset: number = 1): void {
+        rgbBuf.rotate(-offset * 3, 0, 64 * 3)
     }
 
     //% blockId=rgbShow block="RGB show"
