@@ -127,7 +127,7 @@ namespace powerbrick {
         //% block=temperature(°F)
         TemperatureF = 1,
         //% block=humidity
-        Humidity = 1
+        Humidity = 2
     }
 
     export enum Servos {
@@ -199,6 +199,11 @@ namespace powerbrick {
         Blue = 3
     }
 
+    let initialized = false
+    let distanceBuf = 0;
+    let dht11Temp = -1;
+    let dht11Humi = -1;
+
     type EvtAct = () => void;
     let onRfidPresent: EvtAct = null;
     let rgbBuf: Buffer = pins.createBuffer(RGB_PIX * 3);
@@ -214,11 +219,9 @@ namespace powerbrick {
     function dht11Update(pin: DigitalPin): number {
         let loopCnt = 50;
         pins.digitalWritePin(pin, 0)
-        basic.pause(20)
-        control.waitMicros(40)
+        basic.pause(18)
         let t = pins.digitalReadPin(pin)
         pins.setPull(pin, PinPullMode.PullUp);
-
         // Wait for response header to finish
         // dht11 only response every 2s
         while (pins.digitalReadPin(pin) == 1) {
@@ -229,29 +232,25 @@ namespace powerbrick {
         };
         while (pins.digitalReadPin(pin) == 0);
         while (pins.digitalReadPin(pin) == 1);
-        let value = 0;
+        let value: number = 0;
         let counter = 0;
         for (let i = 0; i <= 32 - 1; i++) {
-            loopCnt = 50;
             while (pins.digitalReadPin(pin) == 0);
             counter = 0
             while (pins.digitalReadPin(pin) == 1) {
                 counter += 1;
             }
-            if (counter > 4) {
+            if (counter > 3) {
                 value = value + (1 << (31 - i));
             }
         }
+
         // todo: add bit check
+
         dht11Temp = (value & 0x0000ff00) >> 8;
         dht11Humi = value >> 24;
         return 0;
     }
-
-    let initialized = false
-    let distanceBuf = 0;
-    let dht11Temp = -1;
-    let dht11Humi = -1;
 
     function i2cwrite(addr: number, reg: number, value: number) {
         let buf = pins.createBuffer(2)
@@ -383,7 +382,7 @@ namespace powerbrick {
         if (readtype == DHT11Type.TemperatureC) {
             return dht11Temp;
         } else if (readtype == DHT11Type.TemperatureF) {
-            return ((dht11Temp & 0x0000ff00) >> 8) * 9 / 5 + 32;
+            return Math.floor(dht11Temp * 9 / 5) + 32;
         } else {
             return dht11Humi;
         }
@@ -842,7 +841,7 @@ namespace powerbrick {
     //% blockId=setRGBXy block="RGB %port X%x Y%y Color%rgb"
     //% group="RGB" 
     export function setRGBXy(port: Ports, x: number, y: number, rgb: number): void {
-        setRGBPix(port, x+y*RGB_M, rgb)
+        setRGBPix(port, x + y * RGB_M, rgb)
     }
 
     //% blockId=rgbColor block="Color red %red|green %green|blue %blue"
