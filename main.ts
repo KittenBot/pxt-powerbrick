@@ -198,6 +198,28 @@ namespace powerbrick {
         //% block=blue
         Blue = 3
     }
+    export enum NeoPixelColors {
+        //% block=red
+        Red = 0xFF0000,
+        //% block=orange
+        Orange = 0xFFA500,
+        //% block=yellow
+        Yellow = 0xFFFF00,
+        //% block=green
+        Green = 0x00FF00,
+        //% block=blue
+        Blue = 0x0000FF,
+        //% block=indigo
+        Indigo = 0x4b0082,
+        //% block=violet
+        Violet = 0x8a2be2,
+        //% block=purple
+        Purple = 0xFF00FF,
+        //% block=white
+        White = 0xFFFFFF,
+        //% block=black
+        Black = 0x000000
+    }
 
     let initialized = false
     let distanceBuf = 0;
@@ -208,11 +230,11 @@ namespace powerbrick {
     let onRfidPresent: EvtAct = null;
     let rgbBuf: Buffer = pins.createBuffer(RGB_PIX * 3);
     let rgbPin: DigitalPin;
-    let rgbBright: number = 50;
+    let rgbBright: number = 30;
 
     function setBufferRGB(offset: number, red: number, green: number, blue: number): void {
-        rgbBuf[offset + 0] = red;
-        rgbBuf[offset + 1] = green;
+        rgbBuf[offset + 0] = green;
+        rgbBuf[offset + 1] = red;
         rgbBuf[offset + 2] = blue;
     }
 
@@ -817,9 +839,10 @@ namespace powerbrick {
         rgbShow();
     }
 
-    //% blockId=setRGBPix block="RGB %port PIX%pix Color%rgb"
+    //% blockId=setRGBPix block="RGB %port PIX%pix Color%rgb=neopixel_colors"
     //% group="RGB" 
     export function setRGBPix(port: Ports, pix: number, rgb: number): void {
+        rgbPin = PortDigi[port][0];
         if (pix < 0 || pix >= RGB_PIX)
             return;
         pix = pixMap(pix);
@@ -835,10 +858,11 @@ namespace powerbrick {
             green = (green * br) >> 8;
             blue = (blue * br) >> 8;
         }
+        serial.writeLine("pix " + pix + " " + red + "\n")
         setBufferRGB(pix, red, green, blue)
     }
 
-    //% blockId=setRGBXy block="RGB %port X%x Y%y Color%rgb"
+    //% blockId=setRGBXy block="RGB %port X%x Y%y Color%rgb=neopixel_colors"
     //% group="RGB" 
     export function setRGBXy(port: Ports, x: number, y: number, rgb: number): void {
         setRGBPix(port, x + y * RGB_M, rgb)
@@ -848,6 +872,21 @@ namespace powerbrick {
     //% group="RGB" 
     export function rgb(red: number, green: number, blue: number): number {
         return packRGB(red, green, blue);
+    }
+
+    //% blockId=rgbBrightness block="RGB brightness %brightness"
+    //% group="RGB" 
+    export function setBrightness(brightness: number): void {
+        rgbBright = brightness & 0xff
+    }
+
+    /**
+     * Gets the RGB value of a known color
+    */
+    //% blockId=neopixel_colors block="%color"
+    //% group="RGB" 
+    export function colors(color: NeoPixelColors): number {
+        return color;
     }
 
     //% blockId=rgbShow block="RGB show"

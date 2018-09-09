@@ -50,5 +50,15 @@
     "powerbrick.GCRgb.Brightness|block": "亮度",
     "powerbrick.GCRgb.Red|block": "红",
     "powerbrick.GCRgb.Green|block": "绿",
-    "powerbrick.GCRgb.Blue|block": "蓝"
+    "powerbrick.GCRgb.Blue|block": "蓝",
+    "NeoPixelColors.Red|block": "红",
+    "NeoPixelColors.Orange|block": "橙",
+    "NeoPixelColors.Yellow|block": "黄",
+    "NeoPixelColors.Green|block": "緑",
+    "NeoPixelColors.Blue|block": "蓝",
+    "NeoPixelColors.Indigo|block": "靛蓝",
+    "NeoPixelColors.Violet|block": "紫罗兰",
+    "NeoPixelColors.Purple|block": "紫",
+    "NeoPixelColors.White|block": "白",
+    "NeoPixelColors.Black|block": "黑"
 }
