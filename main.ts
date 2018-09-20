@@ -365,7 +365,7 @@ namespace powerbrick {
             ret = distanceBuf;
         }
         distanceBuf = d;
-        return ret * 10 / 6 / 58;
+        return Math.floor(ret * 10 / 6 / 58);
     }
 
     //% blockId=powerbrick_sound block="Sound|port %port"
