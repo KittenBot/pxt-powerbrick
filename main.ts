@@ -110,6 +110,8 @@ namespace powerbrick {
     export enum PrevNext {
         //% block=play
         Play = 0xaa,
+        //% block=stop
+        Stop = 0xab,
         //% block=next
         Next = 0xac,
         //% block=prev
@@ -244,7 +246,7 @@ namespace powerbrick {
     let rgbBuf: Buffer = pins.createBuffer(RGB_PIX * 3);
     let rgbPin: DigitalPin;
     let rgbBright: number = 30;
-    
+
     function setBufferRGB(offset: number, red: number, green: number, blue: number): void {
         rgbBuf[offset + 0] = green;
         rgbBuf[offset + 1] = red;
@@ -911,7 +913,7 @@ namespace powerbrick {
         let n0 = num % 10;
         let pix = 0;
         rgbBuf.fill(0, 0, RGB_PIX * 3);
-        if (n1 >0 ){
+        if (n1 > 0) {
             pix = FontNum[n1];
             for (let x = 0; x < 3; x++) {
                 let p = (pix >> x * 8) & 0xff;
@@ -922,7 +924,7 @@ namespace powerbrick {
                 }
             }
         }
-       
+
         pix = FontNum[n0];
         for (let x = 0; x < 3; x++) {
             let p = (pix >> x * 8) & 0xff;

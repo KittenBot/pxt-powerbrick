@@ -42,6 +42,7 @@
     "powerbrick.DHT11Type.TemperatureF|block": "温度(°F)",
     "powerbrick.DHT11Type.Humidity|block": "湿度",
     "powerbrick.PrevNext.Play|block": "播放",
+    "powerbrick.PrevNext.Stop|block": "停止",
     "powerbrick.PrevNext.Prev|block": "前一首",
     "powerbrick.PrevNext.Next|block": "下一首",
     "powerbrick.GCMode.ColorSensor|block": "颜色模式",
