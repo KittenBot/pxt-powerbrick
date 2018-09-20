@@ -267,17 +267,27 @@ namespace powerbrick {
                 return -1
             }
         };
+        loopCnt = 500;
         while (pins.digitalReadPin(pin) == 0);
         while (pins.digitalReadPin(pin) == 1);
         let value: number = 0;
         let counter = 0;
         for (let i = 0; i <= 32 - 1; i++) {
-            while (pins.digitalReadPin(pin) == 0);
+            while (pins.digitalReadPin(pin) == 0){
+                loopCnt--;
+                if (loopCnt == 0) {
+                    return -1
+                }
+            };
             counter = 0
             while (pins.digitalReadPin(pin) == 1) {
                 counter += 1;
+                loopCnt--;
+                if (loopCnt == 0) {
+                    return -1
+                }
             }
-            if (counter > 3) {
+            if (counter >= 3) {
                 value = value + (1 << (31 - i));
             }
         }
