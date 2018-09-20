@@ -9,7 +9,7 @@ rgb pixel port from Microsoft/pxt-neopixel
 
 
 //% color="#13c2c2" weight=10 icon="\uf0e7"
-//% groups='["Ultrasonic/Sound", "Tracer", "Bumper", "Weather", "Actuator", "Color/Gesture", "Mp3", "RFID", "RGB"]'
+//% groups='["Ultrasonic/Mic", "Linefollower", "Bumper", "Environment", "Actuator", "Color/Gesture", "Mp3", "RFID", "RGB"]'
 namespace powerbrick {
     const PCA9685_ADDRESS = 0x40
     const MODE1 = 0x00
@@ -346,7 +346,7 @@ namespace powerbrick {
     }
 
     //% blockId=powerbrick_ultrasonic block="Ultrasonic|port %port"
-    //% group="Ultrasonic/Sound" weight=91
+    //% group="Ultrasonic/Mic" weight=91
     export function Ultrasonic(port: Ports): number {
         // send pulse
         let pin = PortDigi[port][0]
@@ -370,27 +370,27 @@ namespace powerbrick {
 
     //% blockId=powerbrick_sound block="Sound|port %port"
     //% weight=90
-    //% group="Ultrasonic/Sound" blockGap=50
+    //% group="Ultrasonic/Mic" blockGap=50
     export function SoundSensor(port: Ports): number {
         let pin = PortAnalog[port]
         return pins.analogReadPin(pin)
     }
 
     //% blockId=powerbrick_tracer block="Tracer|port %port|slot %slot"
-    //% group="Tracer" weight=81
+    //% group="Linefollower" weight=81
     export function Tracer(port: Ports, slot: Slots): boolean {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
-        return pins.digitalReadPin(pin) == 0
+        return pins.digitalReadPin(pin) == 1
     }
 
     //% blockId=powerbrick_onTracerEvent block="on Tracer|%port|slot %slot"
     //% weight=80
-    //% group="Tracer" blockGap=50
+    //% group="Linefollower" blockGap=50
     export function onTracerEvent(port: Ports, slot: Slots, handler: () => void): void {
         let pin = PortDigi[port][slot]
         pins.setPull(pin, PinPullMode.PullUp)
-        pins.onPulsed(pin, PulseValue.Low, handler)
+        pins.onPulsed(pin, PulseValue.High, handler)
     }
 
     //% blockId=powerbrick_bumper block="Bumper|port %port|slot %slot"
@@ -412,7 +412,7 @@ namespace powerbrick {
 
     //% blockId=powerbrick_dht11 block="DHT11|port %port|type %readtype"
     //% weight=60
-    //% group="Weather" blockGap=50
+    //% group="Environment" blockGap=50
     export function DHT11(port: Ports, readtype: DHT11Type): number {
         let pin = PortDigi[port][0]
         dht11Update(pin)
@@ -427,7 +427,7 @@ namespace powerbrick {
 
     //% blockId=powerbrick_soil block="Soil|port %port"
     //% weight=60
-    //% group="Weather" blockGap=50
+    //% group="Environment" blockGap=50
     export function Soil(port: Ports): number {
         let pin = PortAnalog[port]
         return pins.analogReadPin(pin)
@@ -435,7 +435,7 @@ namespace powerbrick {
 
     //% blockId=powerbrick_waterlevel block="Water level |port %port"
     //% weight=60
-    //% group="Weather" blockGap=50
+    //% group="Environment" blockGap=50
     export function WaterLevel(port: Ports): number {
         let pin = PortAnalog[port]
         return pins.analogReadPin(pin)
