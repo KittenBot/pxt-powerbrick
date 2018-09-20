@@ -1,6 +1,6 @@
 {
     "name": "powerbrick",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "description": "Powerbrick series module for microbit",
     "license": "MIT",
     "dependencies": {
@@ -15,5 +15,10 @@
     "testFiles": [
         "test.ts"
     ],
-    "public": true
+    "public": true,
+    "extension": {
+        "namespace": "powerbrick",
+        "label": "NeoMatrix Editor",
+        "localUrl": "http://kittenbot.cn/#/paint"
+    }
 }

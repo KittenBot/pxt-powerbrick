@@ -88,13 +88,30 @@ namespace powerbrick {
         [SerialPin.P15, SerialPin.P14]
     ]
 
-    const PortAnalog = [AnalogPin.P0, AnalogPin.P1, AnalogPin.P2, null, AnalogPin.P3, AnalogPin.P4, AnalogPin.P10]
+    const PortAnalog = [
+        AnalogPin.P0,
+        AnalogPin.P1,
+        AnalogPin.P2,
+        null,
+        AnalogPin.P3,
+        AnalogPin.P4,
+        AnalogPin.P10
+    ]
 
     export enum Ports {
         PORT1 = 0,
         PORT2 = 1,
         PORT3 = 2,
         PORT4 = 3,
+        PORT5 = 4,
+        PORT6 = 5,
+        PORT7 = 6
+    }
+
+    export enum PortsA {
+        PORT1 = 0,
+        PORT2 = 1,
+        PORT3 = 2,
         PORT5 = 4,
         PORT6 = 5,
         PORT7 = 6
@@ -273,7 +290,7 @@ namespace powerbrick {
         let value: number = 0;
         let counter = 0;
         for (let i = 0; i <= 32 - 1; i++) {
-            while (pins.digitalReadPin(pin) == 0){
+            while (pins.digitalReadPin(pin) == 0) {
                 loopCnt--;
                 if (loopCnt == 0) {
                     return -1
@@ -381,7 +398,7 @@ namespace powerbrick {
     //% blockId=powerbrick_sound block="Sound|port %port"
     //% weight=90
     //% group="Ultrasonic/Mic" blockGap=50
-    export function SoundSensor(port: Ports): number {
+    export function SoundSensor(port: PortsA): number {
         let pin = PortAnalog[port]
         return pins.analogReadPin(pin)
     }
@@ -394,7 +411,7 @@ namespace powerbrick {
         return pins.digitalReadPin(pin) == 1
     }
 
-    //% blockId=powerbrick_onTracerEvent block="on Tracer|%port|slot %slot"
+    //% blockId=powerbrick_onTracerEvent block="on Tracer|%port|slot %slot touch black"
     //% weight=80
     //% group="Linefollower" blockGap=50
     export function onTracerEvent(port: Ports, slot: Slots, handler: () => void): void {
@@ -411,7 +428,7 @@ namespace powerbrick {
         return pins.digitalReadPin(pin) == 0
     }
 
-    //% blockId=powerbrick_onBumperEvent block="on Bumper|%port|slot %slot"
+    //% blockId=powerbrick_onBumperEvent block="on Bumper|%port|slot %slot pressed"
     //% group="Bumper" weight=70
     export function onBumperEvent(port: Ports, slot: Slots, handler: () => void): void {
         let pin = PortDigi[port][slot]
@@ -438,7 +455,7 @@ namespace powerbrick {
     //% blockId=powerbrick_soil block="Soil|port %port"
     //% weight=60
     //% group="Environment" blockGap=50
-    export function Soil(port: Ports): number {
+    export function Soil(port: PortsA): number {
         let pin = PortAnalog[port]
         return pins.analogReadPin(pin)
     }
@@ -446,7 +463,7 @@ namespace powerbrick {
     //% blockId=powerbrick_waterlevel block="Water level |port %port"
     //% weight=60
     //% group="Environment" blockGap=50
-    export function WaterLevel(port: Ports): number {
+    export function WaterLevel(port: PortsA): number {
         let pin = PortAnalog[port]
         return pins.analogReadPin(pin)
     }
@@ -1053,16 +1070,16 @@ namespace powerbrick {
     }
 
 
-    //% blockId=powerbrick_getpin block="Pin port|%port slot|%slot"
+    //% blockId=powerbrick_getpin block="Digital port|%port slot|%slot"
     //% advanced=true
     export function GetPin(port: Ports, slot: Slots): DigitalPin {
-        return PortDigi[port][slot];
+        return pins.digitalReadPin(PortDigi[port][slot])
     }
 
-    //% blockId=powerbrick_getanalog block="Analog Pin port|%port"
+    //% blockId=powerbrick_getanalog block="Analog port|%port"
     //% advanced=true
-    export function GetAnalog(port: Ports, slot: Slots): AnalogPin {
-        return PortAnalog[port];
+    export function GetAnalog(port: PortsA): AnalogPin {
+        return pins.analogReadPin(PortAnalog[port])
     }
 
 }
