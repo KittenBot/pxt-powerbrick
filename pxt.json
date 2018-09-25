@@ -1,6 +1,6 @@
 {
     "name": "powerbrick",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "description": "Powerbrick series module for microbit",
     "license": "MIT",
     "dependencies": {
@@ -10,7 +10,8 @@
     "files": [
         "README.md",
         "main.ts",
-        "_locales/zh/powerbrick-strings.json"
+        "_locales/zh-cn/powerbrick-strings.json",
+        "_locales/zh-tw/powerbrick-strings.json"
     ],
     "testFiles": [
         "test.ts"
