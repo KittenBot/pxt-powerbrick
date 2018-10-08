@@ -47,7 +47,7 @@ namespace powerbrick {
     const RFID_STATUS = 0x05
     const RFID_UUID = 0x06
 
-    const RGB_PIX = 64
+    const RGB_PIX = 64*4; // maximum support 4x panel
     const RGB_M = 8;
 
     const FontNum = [
@@ -503,6 +503,7 @@ namespace powerbrick {
             return
         let pp = (index - 1) * 2
         let pn = (index - 1) * 2 + 1
+        // serial.writeString("M " + index + " spd " + speed + " pp " + pp + " pn " + pn + "\n")
         if (speed >= 0) {
             setPwm(pp, 0, speed)
             setPwm(pn, 0, 0)
@@ -711,7 +712,7 @@ namespace powerbrick {
         }
     }
 
-    //% blockId=powerbrick_onrfidpresent block="RFID Present"
+    //% blockId=powerbrick_onrfidpresent block="RFID Present and wait"
     //% weight=20
     //% group="RFID" 
     export function RfidPresent(handler: () => void): void {
@@ -861,8 +862,15 @@ namespace powerbrick {
         rgbShow();
     }
 
-    // todo: export this?
-    function hsl(h: number, s: number, l: number): number {
+    /**
+     * Converts a hue saturation luminosity value into a RGB color
+     * @param h hue from 0 to 360
+     * @param s saturation from 0 to 99
+     * @param l luminosity from 0 to 99
+     */
+    //% blockId=neopixelHSL block="hue %h|saturation %s|luminosity %l"
+    //% group="RGB" 
+    export function hsl(h: number, s: number, l: number): number {
         h = Math.round(h);
         s = Math.round(s);
         l = Math.round(l);
