@@ -16,10 +16,5 @@
     "testFiles": [
         "test.ts"
     ],
-    "public": true,
-    "extension": {
-        "namespace": "powerbrick",
-        "label": "NeoMatrix Editor",
-        "localUrl": "http://kittenbot.cn/#/paint"
-    }
+    "public": true
 }

@@ -47,7 +47,7 @@ namespace powerbrick {
     const RFID_STATUS = 0x05
     const RFID_UUID = 0x06
 
-    const RGB_PIX = 64*4; // maximum support 4x panel
+    const RGB_PIX = 64; // multiple panel support moved to neomatrix
     const RGB_M = 8;
 
     const FontNum = [
