@@ -144,8 +144,8 @@ namespace powerbrick {
     }
 
     export enum Slots {
-        A = 0,
-        B = 1
+        A = 1, // inverse slot by zp
+        B = 0
     }
 
     export enum GCOnOff {
@@ -170,11 +170,7 @@ namespace powerbrick {
         S5 = 12,
         S6 = 13,
         S7 = 14,
-        S8 = 15,
-        S9 = 7,
-        S10 = 6,
-        S11 = 5,
-        S12 = 4
+        S8 = 15
     }
 
     export enum RfidSector {
@@ -217,7 +213,9 @@ namespace powerbrick {
         //% block=proximity
         Proximity = 0x2,
         //% block=gesture
-        Gesture = 0x3
+        Gesture = 0x3,
+        //% block=led
+        LED = 0x4
     }
 
     export enum GCRgb {
