@@ -518,8 +518,8 @@ namespace powerbrick {
     //% speed2.min=-255 speed2.max=255
     //% group="Actuator" name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function MotorRunDual(speed1: number, speed2: number): void {
-        MotorRun(0, speed1);
-        MotorRun(1, speed2);
+        MotorRun(1, speed1);
+        MotorRun(2, speed2);
     }
 
     //% blockId=powerbrick_motor_rundelay block="Motor|%index|speed %speed|delay %delay|s"
