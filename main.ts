@@ -268,50 +268,9 @@ namespace powerbrick {
         rgbBuf[offset + 2] = blue;
     }
 
-    function dht11Update(pin: DigitalPin): number {
-        let loopCnt = 50;
-        pins.digitalWritePin(pin, 0)
-        basic.pause(18)
-        let t = pins.digitalReadPin(pin)
-        pins.setPull(pin, PinPullMode.PullUp);
-        // Wait for response header to finish
-        // dht11 only response every 2s
-        while (pins.digitalReadPin(pin) == 1) {
-            loopCnt--;
-            if (loopCnt == 0) {
-                return -1
-            }
-        };
-        loopCnt = 500;
-        while (pins.digitalReadPin(pin) == 0);
-        while (pins.digitalReadPin(pin) == 1);
-        let value: number = 0;
-        let counter = 0;
-        for (let i = 0; i <= 32 - 1; i++) {
-            while (pins.digitalReadPin(pin) == 0) {
-                loopCnt--;
-                if (loopCnt == 0) {
-                    return -1
-                }
-            };
-            counter = 0
-            while (pins.digitalReadPin(pin) == 1) {
-                counter += 1;
-                loopCnt--;
-                if (loopCnt == 0) {
-                    return -1
-                }
-            }
-            if (counter >= 3) {
-                value = value + (1 << (31 - i));
-            }
-        }
-
-        // todo: add bit check
-
-        dht11Temp = (value & 0x0000ff00) >> 8;
-        dht11Humi = value >> 24;
-        return 0;
+    //% shim=powerbrick::dht11Update
+    function dht11Update(pin: number): number {
+        return 999;
     }
 
     function i2cwrite(addr: number, reg: number, value: number) {
@@ -430,6 +389,7 @@ namespace powerbrick {
     //% group="Bumper" weight=70
     export function onBumperEvent(port: Ports, slot: Slots, handler: () => void): void {
         let pin = PortDigi[port][slot]
+
         pins.setPull(pin, PinPullMode.PullUp)
         pins.onPulsed(pin, PulseValue.Low, handler)
     }
@@ -440,7 +400,14 @@ namespace powerbrick {
     //% group="Environment" blockGap=50
     export function DHT11(port: Ports, readtype: DHT11Type): number {
         let pin = PortDigi[port][0]
-        dht11Update(pin)
+
+        // todo: get pinname in ts
+        let value = (dht11Update(pin - 7) >> 0)
+
+        if (value != 0) {
+            dht11Temp = (value & 0x0000ff00) >> 8;
+            dht11Humi = value >> 24;
+        }
         if (readtype == DHT11Type.TemperatureC) {
             return dht11Temp;
         } else if (readtype == DHT11Type.TemperatureF) {
