@@ -690,7 +690,13 @@ namespace powerbrick {
     export function RfidUUID(): string {
         pins.i2cWriteNumber(RFID_ADDR, RFID_UUID, NumberFormat.UInt8BE);
         let uuid = pins.i2cReadBuffer(RFID_ADDR, 4)
-        return uuid.toHex();
+        let uuidReverse = pins.createBuffer(4)
+        // reverse byte order to micropython type~
+        uuidReverse[0] = uuid[3]
+        uuidReverse[1] = uuid[2]
+        uuidReverse[2] = uuid[1]
+        uuidReverse[3] = uuid[0]
+        return uuidReverse.toHex();
     }
 
     //% blockId=powerbrick_rfidwrite block="RFID Write sector|%sector block|%block text|%txt"

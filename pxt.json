@@ -1,6 +1,6 @@
 {
     "name": "powerbrick",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "Powerbrick series module for microbit",
     "license": "MIT",
     "dependencies": {
@@ -17,5 +17,6 @@
     "testFiles": [
         "test.ts"
     ],
-    "public": true
+    "public": true,
+    "preferredEditor": "tsprj"
 }
