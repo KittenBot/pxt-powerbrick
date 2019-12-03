@@ -9,6 +9,7 @@
     "powerbrick.Soil|block": "土壤感應器|接口 %port",
     "powerbrick.WaterLevel|block": "水位感應器|接口 %port",
     "powerbrick.Servo|block": "舵機|%index|角度 %degree",
+    "powerbrick.Servo2KG|block": "2KG舵機|%index|角度 %degree",
     "powerbrick.MotorRun|block": "馬達|%index|速度 %speed",
     "powerbrick.MotorRunDual|block": "雙馬達|速度 %speed1|速度 %speed2",
     "powerbrick.MotorRunDelay|block": "馬達|%index|速度 %speed|延時 %delay|秒",
