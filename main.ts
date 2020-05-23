@@ -466,7 +466,6 @@ namespace powerbrick {
 
     //% blockId=powerbrick_servo block="Servo|%index|degree %degree"
     //% weight=50
-    //% blockGap=50
     //% degree.min=-45 degree.max=225
     //% group="Actuator" name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function Servo(index: Servos, degree: number): void {
@@ -475,6 +474,22 @@ namespace powerbrick {
         }
         // 50hz: 20,000 us
         let v_us = ((degree - 90) * 20 / 3 + 1500) // 0.6 ~ 2.4
+        let value = v_us * 4096 / 20000
+        setPwm(index, 0, value)
+    }
+
+    //% blockId=powerbrick_servo2kg block="Servo2KG|%index|degree %degree"
+    //% weight=49
+    //% blockGap=50
+    //% degree.min=0 degree.max=360
+    //% group="Actuator" name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    export function Servo2KG(index: Servos, degree: number): void {
+        if (!initialized) {
+            initPCA9685()
+        }
+        // 50hz: 20,000 us
+        //let v_us = (degree * 2000 / 360 + 500)  0.5 ~ 2.5
+        let v_us = (Math.floor((degree) * 2000 / 350) + 500) //fixed
         let value = v_us * 4096 / 20000
         setPwm(index, 0, value)
     }
