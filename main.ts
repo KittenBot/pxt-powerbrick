@@ -9,7 +9,7 @@ rgb pixel port from Microsoft/pxt-neopixel
 
 
 //% color="#13c2c2" weight=10 icon="\uf0e7"
-//% groups='["Ultrasonic/Mic", "Linefollower", "Bumper", "Environment", "Actuator", "Color/Gesture", "Mp3", "RFID", "RGB"]'
+//% groups='["Ultrasonic/Mic", "Linefollower", "Bumper", "Environment", "Actuator", "Color/Gesture", "Mp3", "RFID", "RGB", "InfraTemp"]'
 namespace powerbrick {
     const PCA9685_ADDRESS = 0x40
     const MODE1 = 0x00
@@ -431,6 +431,36 @@ namespace powerbrick {
     export function WaterLevel(port: PortsA): number {
         let pin = PortAnalog[port]
         return pins.analogReadPin(pin)
+    }
+
+    //% blockId=powerbrick_infratemp block="Infra Temp"
+    //% weight=60
+    //% group="InfraTemp"
+    export function InfraTemp(): number {
+        pins.i2cWriteNumber(27, 1, NumberFormat.UInt8BE);
+        let val = pins.i2cReadNumber(27, NumberFormat.Float32LE);
+        return val;
+    }
+
+    //% blockId=powerbrick_envtemp block="Environment Temp"
+    //% weight=60
+    //% group="InfraTemp"
+    export function EnvironTemp(): number {
+        pins.i2cWriteNumber(27, 2, NumberFormat.UInt8BE);
+        let val = pins.i2cReadNumber(27, NumberFormat.Float32LE);
+        return val;
+    }
+
+    //% blockId=powerbrick_led block="Infra LED R:%red G:%green Y:%yellow"
+    //% weight=60
+    //% group="InfraTemp" blockGap=50
+    export function InfraLED(red: number, green: number, yellow: number): void {
+        let buf = pins.createBuffer(5)
+        buf[0] = 8
+        buf[1] = red
+        buf[2] = green
+        buf[3] = yellow
+        pins.i2cWriteBuffer(27, buf)
     }
 
 
