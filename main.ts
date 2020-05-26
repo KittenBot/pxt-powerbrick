@@ -439,7 +439,7 @@ namespace powerbrick {
     export function InfraTemp(): number {
         pins.i2cWriteNumber(27, 1, NumberFormat.UInt8BE);
         let val = pins.i2cReadNumber(27, NumberFormat.Float32LE);
-        return val;
+        return Math.roundWithPrecision(val, 2);
     }
 
     //% blockId=powerbrick_envtemp block="Environment Temp"
@@ -448,7 +448,8 @@ namespace powerbrick {
     export function EnvironTemp(): number {
         pins.i2cWriteNumber(27, 2, NumberFormat.UInt8BE);
         let val = pins.i2cReadNumber(27, NumberFormat.Float32LE);
-        return val;
+        
+        return Math.roundWithPrecision(val, 2);
     }
 
     //% blockId=powerbrick_led block="Infra LED R:%red G:%green Y:%yellow"
