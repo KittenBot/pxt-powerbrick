@@ -399,21 +399,74 @@ namespace powerbrick {
     //% weight=60
     //% group="Environment" blockGap=50
     export function DHT11(port: Ports, readtype: DHT11Type): number {
-        let pin = PortDigi[port][0]
+        let dht11pin = PortDigi[port][0]
 
-        // todo: get pinname in ts
-        let value = (dht11Update(pin - 7) >> 0)
+        pins.digitalWritePin(dht11pin, 0)
+        basic.pause(18)
+        let i = pins.digitalReadPin(dht11pin)
+        pins.setPull(dht11pin, PinPullMode.PullUp);
+        switch (readtype) {
+            case 0:
+                let dhtvalue1 = 0;
+                let dhtcounter1 = 0;
+                while (pins.digitalReadPin(dht11pin) == 1);
+                while (pins.digitalReadPin(dht11pin) == 0);
+                while (pins.digitalReadPin(dht11pin) == 1);
+                for (let i = 0; i <= 32 - 1; i++) {
+                    while (pins.digitalReadPin(dht11pin) == 0);
+                    dhtcounter1 = 0
+                    while (pins.digitalReadPin(dht11pin) == 1) {
+                        dhtcounter1 += 1;
+                    }
+                    if (i > 15) {
+                        if (dhtcounter1 > 2) {
+                            dhtvalue1 = dhtvalue1 + (1 << (31 - i));
+                        }
+                    }
+                }
+                return ((dhtvalue1 & 0x0000ff00) >> 8);
+                break;
+            case 1:
+                while (pins.digitalReadPin(dht11pin) == 1);
+                while (pins.digitalReadPin(dht11pin) == 0);
+                while (pins.digitalReadPin(dht11pin) == 1);
+                let dhtvalue = 0;
+                let dhtcounter = 0;
+                for (let i = 0; i <= 32 - 1; i++) {
+                    while (pins.digitalReadPin(dht11pin) == 0);
+                    dhtcounter = 0
+                    while (pins.digitalReadPin(dht11pin) == 1) {
+                        dhtcounter += 1;
+                    }
+                    if (i > 15) {
+                        if (dhtcounter > 2) {
+                            dhtvalue = dhtvalue + (1 << (31 - i));
+                        }
+                    }
+                }
+                return Math.round((((dhtvalue & 0x0000ff00) >> 8) * 9 / 5) + 32);
+                break;
+            case 2:
+                while (pins.digitalReadPin(dht11pin) == 1);
+                while (pins.digitalReadPin(dht11pin) == 0);
+                while (pins.digitalReadPin(dht11pin) == 1);
 
-        if (value != 0) {
-            dht11Temp = (value & 0x0000ff00) >> 8;
-            dht11Humi = value >> 24;
-        }
-        if (readtype == DHT11Type.TemperatureC) {
-            return dht11Temp;
-        } else if (readtype == DHT11Type.TemperatureF) {
-            return Math.floor(dht11Temp * 9 / 5) + 32;
-        } else {
-            return dht11Humi;
+                let value = 0;
+                let counter = 0;
+
+                for (let i = 0; i <= 8 - 1; i++) {
+                    while (pins.digitalReadPin(dht11pin) == 0);
+                    counter = 0
+                    while (pins.digitalReadPin(dht11pin) == 1) {
+                        counter += 1;
+                    }
+                    if (counter > 3) {
+                        value = value + (1 << (7 - i));
+                    }
+                }
+                return value;
+            default:
+                return 0;
         }
     }
 
