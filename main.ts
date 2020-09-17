@@ -9,7 +9,7 @@ rgb pixel port from Microsoft/pxt-neopixel
 
 
 //% color="#13c2c2" weight=10 icon="\uf0e7"
-//% groups='["Ultrasonic/Mic", "Linefollower", "Bumper", "Environment", "Actuator", "Color/Gesture", "Mp3", "RFID", "RGB", "InfraTemp"]'
+//% groups='["Ultrasonic/Mic", "Linefollower", "Bumper", "Environment", "Actuator", "Color/Gesture", "Mp3", "RFID", "RGB", "InfraTemp", "Led segment"]'
 namespace powerbrick {
     const PCA9685_ADDRESS = 0x40
     const MODE1 = 0x00
@@ -49,6 +49,13 @@ namespace powerbrick {
 
     const RGB_PIX = 64; // multiple panel support moved to neomatrix
     const RGB_M = 8;
+
+    const COMMAND_I2C_ADDRESS = 0x24
+    const DISPLAY_I2C_ADDRESS = 0x34
+    const _SEG = [0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71];
+
+    let _intensity = 3
+    let dbuf = [0, 0, 0, 0]
 
     const FontNum = [
         0xff81ff,
@@ -273,6 +280,22 @@ namespace powerbrick {
         return 999;
     }
 
+    /**
+     * send command to display
+     * @param is command, eg: 0
+     */
+    function segCmd(c: number) {
+        pins.i2cWriteNumber(COMMAND_I2C_ADDRESS, c, NumberFormat.Int8BE)
+    }
+
+    /**
+     * send data to display
+     * @param is data, eg: 0
+     */
+    function segDat(bit: number, d: number) {
+        pins.i2cWriteNumber(DISPLAY_I2C_ADDRESS + (bit % 4), d, NumberFormat.Int8BE)
+    }
+
     function i2cwrite(addr: number, reg: number, value: number) {
         let buf = pins.createBuffer(2)
         buf[0] = reg
@@ -285,6 +308,7 @@ namespace powerbrick {
         buf[0] = value
         pins.i2cWriteBuffer(addr, buf)
     }
+
 
     function i2cread(addr: number, reg: number) {
         pins.i2cWriteNumber(addr, reg, NumberFormat.UInt8BE);
@@ -507,7 +531,7 @@ namespace powerbrick {
 
     //% blockId=powerbrick_led block="Infra LED R:%red G:%green Y:%yellow"
     //% weight=60
-    //% group="InfraTemp" blockGap=50
+    //% group="InfraTemp" weight=50
     export function InfraLED(red: number, green: number, yellow: number): void {
         let buf = pins.createBuffer(5)
         buf[0] = 8
@@ -515,6 +539,102 @@ namespace powerbrick {
         buf[2] = green
         buf[3] = yellow
         pins.i2cWriteBuffer(27, buf)
+    }
+    
+    /**
+     * turn on display
+     */
+    //% blockId="powerbrick_segment_on" block="turn on display"
+    //% group="Led segment" weight=32
+    export function segOn() {
+        segCmd(_intensity * 16 + 1)
+    }
+
+    /**
+     * turn off display
+     */
+    //% blockId="powerbrick_segment_off" block="turn off display"
+    //% group="Led segment" weight=31
+    export function segOff() {
+        _intensity = 0
+        segCmd(0)
+    }
+
+    /**
+     * clear display content
+     */
+    //% blockId="powerbrick_segment_clear" block="clear display"
+    //% group="Led segment" weight=33
+    export function segClear() {
+        segDat(0, 0)
+        segDat(1, 0)
+        segDat(2, 0)
+        segDat(3, 0)
+        dbuf = [0, 0, 0, 0]
+    }
+
+    /**
+     * show a digital in given position
+     * @param digit is number (0-15) will be shown, eg: 1
+     * @param bit is position, eg: 0
+     */
+    //% blockId="powerbrick_segment_digit" block="show digit %num|at %bit"
+    //% group="Led segment" weight=39
+    //% num.max=9 num.min=0
+    //% bit.max=3 bit.min=0
+    export function segDigit(num: number, bit: number) {
+        dbuf[bit % 4] = _SEG[num % 16]
+        segDat(bit, _SEG[num % 16])
+    }
+
+    /**
+     * show a number in display
+     * @param num is number will be shown, eg: 100
+     */
+    //% blockId="powerbrick_segment_number" block="show number %num"
+    //% group="Led segment" weight=38
+    export function segShowNumber(num: number) {
+        if (num < 0) {
+            segDat(0, 0x40) // '-'
+            num = -num
+        }
+        else
+            segDigit(Math.idiv(num, 1000) % 10, 0)
+        segDigit(num % 10, 3)
+        segDigit(Math.idiv(num, 10) % 10, 2)
+        segDigit(Math.idiv(num, 100) % 10, 1)
+    }
+
+
+    /**
+     * show Dot Point in given position
+     * @param bit is positiion, eg: 0
+     * @param show is true/false, eg: true
+     */
+    //% blockId="powerbrick_segment_dot" block="show dot point %bit|Show %show"
+    //% group="Led segment" weight=35
+    //% bit.max=3 bit.min=0
+    export function segShowDpAt(bit: number, show: boolean) {
+        if (show) segDat(bit, dbuf[bit % 4] | 0x80)
+        else segDat(bit, dbuf[bit % 4] & 0x7F)
+    }
+
+    /**
+     * set display intensity
+     * @param dat is intensity of the display, eg: 3
+     */
+    //% blockId="powerbrick_segment_intensity" block="set intensity %dat"
+    //% group="Led segment" weight=34
+    //% dat.max=8 dat.min=0
+    export function segSetIntensity(dat: number) {
+        if ((dat < 0) || (dat > 8))
+            return;
+        if (dat == 0)
+            segOff()
+        else {
+            _intensity = dat
+            segCmd((dat << 4) | 0x01)
+        }
     }
 
 
