@@ -638,6 +638,20 @@ namespace powerbrick {
     }
 
 
+    //% blockId=powerbrick_servo360 block="Servo360|%index|Speed %speed"
+    //% weight=49
+    //% speed.min=-255 speed.max=255
+    //% group="Actuator" name.fieldEditor="gridpicker" name.fieldOptions.columns=4
+    export function Servo360(index: Servos, speed: number): void {
+        if (!initialized) {
+            initPCA9685()
+        }
+        // 50hz: 20,000 us
+        let v_us = (200 / 51) * speed + 1500 // 0.5~2.5
+        let value = v_us * 4096 / 20000
+        setPwm(index, 0, value)
+    }
+
     //% blockId=powerbrick_servo block="Servo|%index|degree %degree"
     //% weight=50
     //% degree.min=-45 degree.max=225
@@ -978,6 +992,8 @@ namespace powerbrick {
     //% group="RGB"
     export function rgbConnect(port: Ports) {
         rgbPin = PortDigi[port][0];
+        basic.pause(20)
+        showColor(colors(NeoPixelColors.Black))
     }
 
     /**

@@ -10,6 +10,7 @@
     "powerbrick.WaterLevel|block": "水位感應器|接口 %port",
     "powerbrick.Servo|block": "GeekServo|9g舵機|%index|角度 %degree",
     "powerbrick.Servo2KG|block": "2kg舵機|%index|角度 %degree",
+    "powerbrick.Servo360|block": "360度橙色舵機|%index|速度 %speed",
     "powerbrick.MotorRun|block": "馬達|%index|速度 %speed",
     "powerbrick.MotorRunDual|block": "雙馬達|速度 %speed1|速度 %speed2",
     "powerbrick.MotorRunDelay|block": "馬達|%index|速度 %speed|延時 %delay|秒",
