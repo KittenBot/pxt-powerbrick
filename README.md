@@ -1,20 +1,160 @@
 # powerbrick
 
-Extension for Kittenbot powerbrick module series
-![](icon.png)
+![](Powerbrick.png)
+
 
 ## Feature
 
-Microbit is just a bare board. If only a single LED light is on, it won't last long to attract young people to continue learning programming. In practice we found that the wiring process is still a high threshold for most primary and middle school students. It is not friendly to class. We hope that students will put more energy into the logic of programming, instead of wiring. We hope that they can quickly use their common objects in the home to quickly realize their ideas, express their logic ideas in real form, and skillfully use electronic modules to solve problems in life. 
-
-Powerbrick is composition by Armoubit and a series of electrionic and actuator modules. The Armoubit act as module hub to microbit, which caters to the current deucational needs. 
-
-With Madecode as the programming platform, users can learn the most common and effective programming methods without staying in a specific programming language or software of a hardware manufacturer. Armourbit expansion box with servo drive, motor drive, buzzer.
+This extension is designed to programme and drive the moudule series Powerbrick for micro:bit, You can [get Powerbrick From KittenBot](https://www.kittenbot.cc/collections/frontpage/products/powerbrick-10-in-1-robotics-kit-for-microbit)
 
 
-----------
+## Basic usage
+* The Ultrasonic & Sound sensor module works and feeds back the data of distance and sound to the micro:bit
 
-For more infomation please visit [Learn Powerbrick](http://learn.kittenbot.cn/zh_CN/latest/powerbrick/index.html)
+```blocks
+
+    input.onButtonPressed(Button.A, function () {
+        basic.showNumber(powerbrick.Ultrasonic(powerbrick.Ports.PORT1))
+    })
+    input.onButtonPressed(Button.B, function () {
+        basic.showNumber(powerbrick.SoundSensor(powerbrick.PortsA.PORT1))
+    })
+
+
+```
+
+---
+
+* The buzzer sounds when the line tracker module detects a black line
+
+```blocks
+
+    basic.forever(function () {
+        if (powerbrick.Tracer(powerbrick.Ports.PORT1, powerbrick.Slots.A) || powerbrick.Tracer(powerbrick.Ports.PORT1, powerbrick.Slots.B)) {
+            music.playTone(262, music.beat(BeatFraction.Whole))
+        }
+    })
+
+```
+
+---
+
+* Press the Bumper and the buzzer will sound
+
+```blocks
+
+    basic.forever(function () {
+        if (powerbrick.Bumper(powerbrick.Ports.PORT1, powerbrick.Slots.A) || powerbrick.Bumper(powerbrick.Ports.PORT1, powerbrick.Slots.B)) {
+            music.playTone(262, music.beat(BeatFraction.Whole))
+        }
+    })
+
+```
+
+---
+
+* Temperature and humidity data will be displayed on micro:bit
+
+```blocks
+
+    input.onButtonPressed(Button.A, function () {
+        basic.showNumber(powerbrick.DHT11(powerbrick.Ports.PORT1, powerbrick.DHT11Type.TemperatureC))
+    })
+    
+```
+
+---
+
+* Let the servo(grey / limited in -45~225) and the motor(red / limited in -255~255) work.
+
+```blocks
+
+    basic.forever(function () {
+        powerbrick.MotorRun(powerbrick.Motors.M1, -255)
+        powerbrick.Servo(powerbrick.Servos.S1, -45)
+        basic.pause(2000)
+        powerbrick.MotorRun(powerbrick.Motors.M1, 255)
+        powerbrick.Servo(powerbrick.Servos.S1, 225)
+        basic.pause(2000)
+    })
+    
+```
+
+---
+
+* The color & gesture module displays the color(Hue) value on the micro:bit
+
+```blocks
+
+    input.onButtonPressed(Button.A, function () {
+        basic.showNumber(powerbrick.GC_Color())
+    })
+    powerbrick.GC_MODE(powerbrick.GCMode.ColorSensor)
+
+```
+
+---
+
+* The color & gesture module will send 1~4 to the micro:bit means 4 directions, and 0 means no gestrue
+
+```blocks
+
+    let now_ges = 0
+    powerbrick.GC_MODE(powerbrick.GCMode.Gesture)
+    basic.forever(function () {
+        now_ges = powerbrick.GC_Color()
+        if (!(now_ges == 0)) {
+            basic.showNumber(now_ges)
+        }
+    })
+
+```
+
+---
+
+* The RFID module detects the RFID card, it will displays the UUID of the card and writes a piece of information to the card
+
+```blocks
+
+    powerbrick.RfidPresent(function () {
+        basic.showString(powerbrick.RfidUUID())
+        basic.pause(500)
+        powerbrick.RfidWrite(powerbrick.RfidSector.S1, powerbrick.RfidBlock.B0, "hello")
+        basic.showString(powerbrick.RfidRead(powerbrick.RfidSector.S1, powerbrick.RfidBlock.B0))
+    })
+    basic.forever(function () {
+        powerbrick.RfidProbe()
+    })
+
+```
+
+---
+
+* Let the RGB module display
+
+```blocks
+
+input.onButtonPressed(Button.A, function () {
+    powerbrick.showColor(powerbrick.colors(powerbrick.NeoPixelColors.Red))
+    powerbrick.rgbShow()
+})
+powerbrick.rgbConnect(powerbrick.Ports.PORT1)
+
+```
+
+---
+
+* MP3 will play mp3 audio stored in the tf card
+
+```blocks
+
+input.onButtonPressed(Button.A, function () {
+    powerbrick.MP3Play(powerbrick.PrevNext.Play)
+})
+powerbrick.MP3Connect(powerbrick.SerialPorts.PORT1)
+
+```
+
 
 ## License
 
@@ -24,8 +164,3 @@ MIT
 
 * for PXT/microbit
 * for PXT/meowbit
-(The metadata above is needed for package search.)
-
-```package
-powerbrick=github:Kittenbot/pxt-powerbrick
-```

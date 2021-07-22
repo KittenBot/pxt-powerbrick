@@ -1,6 +1,6 @@
 {
     "name": "powerbrick",
-    "version": "0.3.7",
+    "version": "0.3.8",
     "description": "Powerbrick series module for microbit",
     "license": "MIT",
     "dependencies": {
