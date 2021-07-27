@@ -5,7 +5,17 @@
 
 ## Feature
 
-This extension is designed to programme and drive the moudule series Powerbrick for micro:bit, You can [get Powerbrick From KittenBot](https://www.kittenbot.cc/collections/frontpage/products/powerbrick-10-in-1-robotics-kit-for-microbit)
+* This extension is designed to programme and drive the moudule series Powerbrick for micro:bit, You can [get Powerbrick From KittenBot](https://www.kittenbot.cc/collections/frontpage/products/powerbrick-10-in-1-robotics-kit-for-microbit)
+
+1. The module adopts a high-quality plastic shell structure, and its size conforms to Lego standards: 3x7 and 7x7. Combining with Lego, you can make different projects quickly and easily and have more fun with programming.
+
+2. The anti-reverse PH2.0 cable is adopted to effectively avoid sensor damage caused by incorrect connection, make it safer to use and reduce the probability of damage and consumption of classroom equipment.
+
+3. A variety of sensors are included, 8 servos and 4 motors can be plugged in the expansion board, which allows children to use their imaginations freely.
+
+4. Most sensors have multiple functions. For example, the ultrasonic module not only has the function of distance measurement, but also has the function of sound intensity detection, so you can now use the most functions with the least wiring.
+
+5. The power supply in the Powerbrick kit adopts 18650 lithium battery, which has a large capacity and can be recharged repeatedly, and the battery box has the functions of anti-reverse connection and over-current protection of the lithium battery, so children can use it safely.
 
 
 ## Basic usage
@@ -65,7 +75,7 @@ This extension is designed to programme and drive the moudule series Powerbrick 
 
 ---
 
-* Let the servo(grey / limited in -45~225) and the motor(red / limited in -255~255) work.
+* Let the servo(grey / limited in -45-225) and the motor(red / limited in -255-255) work.
 
 ```blocks
 
