@@ -987,7 +987,7 @@ namespace powerbrick {
     }
 
 
-    //% blockId="powerbrick_rgbattach" block="RGB connect ot %port"
+    //% blockId="powerbrick_rgbattach" block="RGB connect to %port"
     //% weight=85 blockGap=8
     //% group="RGB"
     export function rgbConnect(port: Ports) {
