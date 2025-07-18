@@ -11,8 +11,6 @@ powerbrick.onBumperEvent(powerbrick.Ports.PORT1, powerbrick.Slots.A, function ()
 powerbrick.MP3Connect(powerbrick.SerialPorts.PORT4)
 powerbrick.GC_MODE(powerbrick.GCMode.ColorSensor)
 basic.forever(function () {
-    serial.writeValue("temp", powerbrick.DHT11(powerbrick.Ports.PORT2, powerbrick.DHT11Type.TemperatureF))
-    serial.writeValue("humi", powerbrick.DHT11(powerbrick.Ports.PORT2, powerbrick.DHT11Type.Humidity))
     serial.writeValue("ultr", powerbrick.Ultrasonic(powerbrick.Ports.PORT3))
     serial.writeValue("sound", powerbrick.Ultrasonic(powerbrick.Ports.PORT3))
     serial.writeValue("color", powerbrick.GC_Color())

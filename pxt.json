@@ -1,11 +1,12 @@
 {
     "name": "powerbrick",
-    "version": "0.3.9",
+    "version": "0.4.0",
     "description": "Powerbrick series module for microbit",
     "license": "MIT",
     "dependencies": {
         "core": "*",
-        "ws2812b": "github:Microsoft/pxt-ws2812b#v0.0.4"
+        "ws2812b": "github:Microsoft/pxt-ws2812b#v0.0.4",
+        "microphone": "*"
     },
     "files": [
         "README.md",
@@ -17,5 +18,12 @@
         "test.ts"
     ],
     "public": true,
+    "targetVersions": {
+        "target": "8.0.8",
+        "targetId": "microbit"
+    },
+    "supportedTargets": [
+        "microbit"
+    ],
     "preferredEditor": "tsprj"
 }
