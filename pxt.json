@@ -1,6 +1,6 @@
 {
     "name": "powerbrick",
-    "version": "0.4.0",
+    "version": "0.4.2",
     "description": "Powerbrick series module for microbit",
     "license": "MIT",
     "dependencies": {
@@ -19,7 +19,7 @@
     ],
     "public": true,
     "targetVersions": {
-        "target": "8.0.8",
+        "target": "8.0.13",
         "targetId": "microbit"
     },
     "supportedTargets": [
